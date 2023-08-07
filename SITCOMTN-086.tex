@@ -1,5 +1,5 @@
-\documentclass[SE,authoryear,toc]{lsstdoc}
-\input{meta}
+\documentclass[SE,authoryear,toc]{article}
+%\input{meta}
 
 % Package imports go here.
 
@@ -54,6 +54,34 @@ Current baseline plan for the year 1 minimum viable product as delivered for ORR
 \section{Introduction}
 
 \section{Requirements}
+The requirements on calibration are defined in the Science Requirements Document (LPM-17). The photometric quality and accuracy of the LSST data products is driven by four main components:
+\begin{enumerate}
+    \item Relative photometry (repeatability)
+    \item Stability across the sky (spatial uniformity)
+    \item Relative accuracy (color zero-points)
+    \item Transfer to physical flux scale (external absolute photometry)
+\end{enumerate}
+
+The requirements for photometric calibration accuracy are specified using the following error decomposition (valid in the limit of small errors):
+\begin{equation}
+    m_{cat} = m_{true} +\sigma+\delta_{m} (x,y,\theta,\alpha,\delta,SED,t)+\Delta\,m
+\end{equation}
+
+where $m_{true}$ is the true magnitude defined by eqs. 4 and 7, $m_{cat}$ is the cataloged LSST magnitude, $\sigma$ is the random photometric error (including random calibration errors and count extraction errors), and $\Delta$m is the overall (constant) offset of the internal survey system from a perfect AB system (the six values of ∆m are equal for all the cataloged objects). 
+Here, $\delta$m de- scribes the various systematic dependencies of the internal zeropoint error around ∆m, such as position in the field of view (x, y), the normalized system response ($\theta$), position on the sky ($\alpha$,$\delta$),and the source spectral energy distribution(SED).
+Note that the average of $\delta$m over the cataloged area is 0 by construction.
+
+The SRD allocates error specifications for the griz bands, with a 50\% increase expected for u and y bands. These high level allocations are further broken down to three main elements in Observatory System Specifications (LSE-30). These are Instrument Throughput, Atmospheric Transmittance, and Reference Star Catalogs. The full functional error budget can be found in LSST Document-9553.
+
+\begin{table}[|||]
+| Design Spec (millimag) | Repeatability | Uniformity | Color Accuracy | External Absolute Photometry |
+| Overall Specification | 5 | | 10 | 5 | 10 |
+| Instrument Throughput | 3 | 2 | 3 | - |
+| Atmospheric Transmittance | 3.5 | 4 | 3 | - |
+| Reference Catalog | 2.5 | 9 | 3 | - | 
+\end{table}
+
+From these functional requirements, requirements are allocated to the Telescope \& Site (LSE-60) and Data Management (LSE-61) systems to ensure that the functional requirements are met. 
 
 \section{Calibration Approach}
 \subsection{ISR Operation}
