@@ -1,15 +1,17 @@
 \documentclass[SE,authoryear,toc]{article}
 %\input{meta}
-<<<<<<< HEAD
-=======
-\usepackage{graphicx}   
-\usepackage{caption}
-\usepackage{subcaption}
->>>>>>> 84d3025 (parker init push)
 
 % Package imports go here.
 
+\usepackage{graphicx}
+\usepackage{caption}
+\usepackage{subcaption}
+
 % Local commands go here.
+\newcommand{mcat}{m_{\mathrm{cat}}}
+\newcommand{mtrue}{m_{\mathrm{true}}}
+\newcommand{deltam}{\delta_m}
+\newcommand{Deltam}{\Delta\,m}
 
 %If you want glossaries
 %\input{aglossary.tex}
@@ -57,6 +59,38 @@ Parker Fagrelius, Eli Rykoff
 
 \section{Introduction}
 
+The basic question of photometric calibration of an astronomical survey is how
+to take raw counts output from the camera (in arbitrary Analog-Digital Units
+(ADU)) and convert these to calibrated fluxes in nanoJansky (nJy).  In order
+for this procedure to yield uniform results across the camera and the sky, it
+must take into account variations that are both achromatic (``gray'') and
+chromatic, that latter of which depend on the spectral energy distribution (SED) of each
+object.  This includes variations in the atmosphere as a function of time and
+airmass; spatial variations in the filter and detectors; pixel size variations;
+and various sensor effects such as charge transfer ineffeciency (CTI) and the
+Brighter Fatter Effect (BFE).
+
+This technote describes the baseline photometric calibration plan for Rubin
+Commissioning and the first year of data release production for the LSST
+Survey.  This includes plans on performing instrumental signature reduction
+(ISR), which is also known as ``detrending''; correct flat-fielding;
+background/foreground subtraction; and derivation of a uniform photometric
+calibration over the full survey.  It also includes plans for generating
+``calibration frames'' such as bias, darks, and various types of flats,
+incorporating LEDs, a class 4 tunable laser, and a novel Collimated Beam
+Projector (CBP).  We expect that this is not the final calibration plan for the
+LSST survey, but rather a first minimal viable product suitable for the first
+year of survey observations to meet our required goals for repeatability and
+uniformity.  Further improvements are planned to incorporate more effects,
+although our plan is to take as much calibration data early on to be able to
+reprocess early data with improved algorithms.
+
+The calibration plan in this technote is heavily influenced by the Dark Energy
+Survey, which achieved better than $2~\mathrm{mmag}$ uniformity over
+$5000\,\mathrm{deg}^2$ in the Southern sky~(Rykoff et al. 2023).  In
+particular, we refer the reader to Bernstein et al. 2017 (henceforth B17) and
+Burke, Rykoff, et al. 2018 (henceforth BR18).
+
 \section{Requirements}
 The requirements on calibration are defined in the Science Requirements Document (LPM-17). The photometric quality and accuracy of the LSST data products is driven by four main components:
 \begin{enumerate}
@@ -68,13 +102,11 @@ The requirements on calibration are defined in the Science Requirements Document
 
 The requirements for photometric calibration accuracy are specified using the following error decomposition (valid in the limit of small errors):
 \begin{equation}
-<<<<<<< HEAD
-    m_{cat} = m_{true} +\sigma+\delta_{m} (x,y,\theta,\alpha,\delta,SED,t)+\Delta\,m
+    \mcat = mtrue +\sigma+\deltam (x,y,\theta,\alpha,\delta,\mathrm{SED},t)+\Deltam
 \end{equation}
-
-where $m_{true}$ is the true magnitude defined by eqs. 4 and 7, $m_{cat}$ is the cataloged LSST magnitude, $\sigma$ is the random photometric error (including random calibration errors and count extraction errors), and $\Delta$m is the overall (constant) offset of the internal survey system from a perfect AB system (the six values of ∆m are equal for all the cataloged objects). 
-Here, $\delta$m de- scribes the various systematic dependencies of the internal zeropoint error around ∆m, such as position in the field of view (x, y), the normalized system response ($\theta$), position on the sky ($\alpha$,$\delta$),and the source spectral energy distribution(SED).
-Note that the average of $\delta$m over the cataloged area is 0 by construction.
+where $\mtrue$ is the true magnitude defined by eqs. 4 and 7, $\mcat$ is the cataloged LSST magnitude, $\sigma$ is the random photometric error (including random calibration errors and count extraction errors), and $\Deltam$ is the overall (constant) offset of the internal survey system from a perfect AB system (the six values of $\Deltam} are equal for all the cataloged objects).
+Here, $\deltam$ describes the various systematic dependencies of the internal zeropoint error around $\Deltam}, such as position in the field of view (x, y), the normalized system response ($\theta$), position on the sky ($\alpha$,$\delta$),and the source spectral energy distribution(SED).
+Note that the average of $\deltam$ over the cataloged area is 0 by construction.
 
 The SRD allocates error specifications for the griz bands, with a 50\% increase expected for u and y bands. These high level allocations are further broken down to three main elements in Observatory System Specifications (LSE-30). These are Instrument Throughput, Atmospheric Transmittance, and Reference Star Catalogs. The full functional error budget can be found in LSST Document-9553.
 
@@ -83,9 +115,8 @@ The SRD allocates error specifications for the griz bands, with a 50\% increase 
 | Overall Specification | 5 | | 10 | 5 | 10 |
 | Instrument Throughput | 3 | 2 | 3 | - |
 | Atmospheric Transmittance | 3.5 | 4 | 3 | - |
-| Reference Catalog | 2.5 | 9 | 3 | - | 
+| Reference Catalog | 2.5 | 9 | 3 | - |
 
-    \textrm{m}_{cat} = \textrm{m}_{true} +\sigma+\delta_{m} (x,y,\theta,\alpha,\delta,\textrm{SED},t)+\Delta\,m
 \end{equation}
 
 where $\textrm{m}_{true}$ is the true magnitude defined by eqs. 4 and 7, 
@@ -119,7 +150,37 @@ The full functional error budget can be found in LSST Document-9553.
 From these functional requirements, requirements are allocated to the Telescope \& Site (LSE-60) and Data Management (LSE-61) systems to ensure that the functional requirements are met. 
 
 \section{Calibration Approach}
+
+This section describes our overall approach to calibration.  There will need to
+be other papers detailing aspects.
+
+\subsection{Overview of the Model}
+
+The fundamental goal of photometric calibration is to estimate the surface
+brightness of sources across the full sky in a uniform way.  Following B17, we
+define $I_*(\theta, \phi, \lambda, t)$ as the surface brightness at an
+arbitrary celestial coordinate $(\theta, \phi)$, with wavelength $\lambda$ at a
+given time $t$.  For LSST, all survey exposures are 30 seconds, taken in
+sequence, so $t$ uniquely identifies a given exposure.  The quantity $I_*$ has
+units of power per area per solid angle per wavelength.
+
+There is a different response to photons that are focused by the telescope and
+those that are not focused that is very relevant to the way we use flat fields,
+as discussed below.  For focused photons, our astrometric calibration can map
+photons at position $(x, y)$ to celestial coordinates.  The astrometric
+solution also yields the solid angle subtended by each pixel, which we assume
+is a nominal value $\Omega_0$ multipled by a relative scaling vector
+$\bf{\Omega}$ over the full camera array.  We further note that we must
+distinguish between images representing the surface brightness (at a pixel (a
+``surface brightness'' image) vs images representing the flux received in a
+pixel (a ``fluence image'').  These two images differ by a factor of
+$\bf{Omega}$.  We note that aperture fluxes assume fluence images, while
+model-fitting fluxes assume surface brightness images.
+
 \subsection{ISR Operation}
+
+Need sub-sub-sections.
+
 \subsection{Applying Flats}
 \subsection{Global Calibration}
 
