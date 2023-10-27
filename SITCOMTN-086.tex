@@ -154,7 +154,7 @@ From these functional requirements, requirements are allocated to the Telescope 
 This section describes our overall approach to calibration.  There will need to
 be other papers detailing aspects.
 
-\subsection{Overview of the Model}
+\subsection{Standard Bandpasses and Standard Sources}
 
 The fundamental goal of photometric calibration is to estimate the surface
 brightness of sources across the full sky in a uniform way.  Following B17, we
@@ -177,11 +177,253 @@ pixel (a ``fluence image'').  These two images differ by a factor of
 $\bf{Omega}$.  We note that aperture fluxes assume fluence images, while
 model-fitting fluxes assume surface brightness images.
 
+Following B17, we can model the production of photo-electrons in the detectors
+from focused sky photons as the following, for each pixel at $(x, y)$:
+%
+\begin{equation}
+  \mathrm{Rate}(t, x, y) = \Omega_0 \int d\lambda
+  \frac{\lambda}{hc}A_{\mathrm{obs}}(\lambda, t, x, y) I_*(\lambda, t, x, y)
+  \Omega(\lambda, t, x, y)\\
+  = \frac{\Omega_0}{f_1 \times 1\,\mathrm{s}} \int d\lambda I_*(\lambda,
+  t, x, y)S_{\mathrm{std}}(\lambda)S_{\mathrm{obs}}(\lambda, t, x,
+  y)\Omega(\lambda, t, x, y)
+\end{equation}
+
+The value $A_{\mathrm{obs}}$ is the total collecting area times the
+transmission of the atmosphere and system, multiplied by the quantum efficiency
+of the individual pixel for a given observation.  The constant $1/f_1$ is the
+product of the effective area times the photon energy terms.  We define a
+dimensionless standard bandpass $S_{\mathrm{std}}(\lambda)$ represents the
+spectral response of the system for a typical pixel in typical (standard)
+observing conditions.  The function $S_{\mathrm{obs}}(\lambda, t)$ describes
+the spatio-temporal deviations from these reference conditions.  As discussed
+in BR18, these corrections are minimized with a well-chosen standard passband.
+As discussed below, there is an additional challenge with LSSTCam with two
+different types of sensors (E2V and ITL), with different characteristic quantum
+efficiency as a function of wavelength.  We are faced with a choice of
+optimizing our standard bandpass for the center of the focal plane with minimal
+corrections there and larger corrections at the edges, or for the full focal
+plane with moderate corrections everywhere.
+
+For a point source, the surface brightness incident on the focal plane is
+spread by the point spread function (PSF), normalized as:
+%
+\begin{equation}
+  I_*(\lambda, t, x, y) = \frac{f}{\Omega_0}F_*(\lambda)\mathrm{PSF}(\lambda,
+  t, x, y),
+\end{equation}
+%
+\begin{equation}
+  \Sum_{x,y}\mathrm{PSF}(\lambda, t, x, y)\Omega(\lambda, t, x, y) = 1
+\end{equation}
+%
+\begin{equation}
+  \int d_\lambda F_*(\lambda) S_{\mathrm{std}}(\lambda) = 1
+\end{equation}
+%
+Imaging cameras such as LSSTCam can only count photons and not their energy, a
+single epoch can only estimate the amplitude $f$ of the stellar flux, and not the
+full SED $F_*(\lambda)$.
+
+First, we start with the determination of $f$ for sources which share a
+standard reference spectrum $F_{\mathrm{std}}$.  We discuss the case of
+different SEDs in the following section.  The goal of photometric
+calibration is to ensure we get the same value for $f$ invariant of time or
+location on the focal plane.  To properly estimate $f$ from the $\mathrm{Rate}$
+image, we define a dimensionless ``reference flat''
+%
+\begin{equation}
+  r_{\mathrm{ref}}(t, x, y) = \int
+  d\lambda\,F_{\mathrm{std}}(\lambda)S_{\mathrm{std}}(\lambda)r(\lambda, t, x,
+  y)
+\end{equation}
+%
+and construct the fluence image, with units of counts:
+%
+\begin{equation}
+  \mathrm{Fluence}(t, x, y) \equiv T \frac{\mathrm{Rate}(t, x, y)}{r(t, x, y)}
+\end{equation}
+%
+with an exposure time $T$.  Under the assumption that the PSF and area factor
+$\Omega$ are independent of wavelength and the width of the PSF (admittedly
+naive assumptions; see [refs]), we can esimate the source flux with a simple
+sum over pixels in the footprint of the object:
+%
+\begin{equation}
+  \left ( \frac{1\,\mathrm{s}}{T} \right ) \Sum_{x, y} \mathrm{Fluence}(t, x,
+  y)\\
+  = \frac{f}{f_1}\frac{\int d\lambda
+    F_{\mathrm{std}}(\lambda)r_{\mathrm{ref}}(\lambda, t)\mathrm{PSF}(t, x,
+    y)\Omega(t, x, y)}{\int d\lambda F_{\mathrm{std}} r_{\mathrm{ref}}
+    r(\lambda, t, x, y)}\\
+  = \frac{f}{f_1}\Sum_{x, y} \mathrm{PSF}(t, x, y)\Omega(t, x, y)\\
+  = \frac{f}{f_1}
+\end{equation}
+%
+Therefore, the reference flat is the quantity we need to get uniform photometry
+across the survey.  While this can be roughly approximated by a dome flat
+field, as discussed in B17 this must be modified significantly to be suitable
+for accurate photometry.
+
+\subsection{Chromatic Corrections}
+
+We need to port over stuff from the FGCM paper on the chromatic corrections,
+specifically Section 2.  At least the outline.
+
+At this point, we need to decompose Eqn [above] into the components due to
+atmosphere, optics, and sensor.
+%
+\begin{equation}
+  A_b^{\mathrm{obs}} = A\,S^{\mathrm{atm}}(\lambda, t, \mathrm{alt}, \mathrm{az})\,S^{\mathrm{det}}(\lambda,
+  x, y)\,S^{\mathrm{opt}}(\lambda, x, y)\,S^{\mathrm{filter}}(\lambda, x, y)
+\end{equation}
+%
+where $A$ is the nominal collecting area, $S_{\mathrm{atm}}(\lambda, t,
+\mathrm{alt}, \mathrm{az})$ is the transmission of the atmosphere as a function
+of wavelength, time, altitude, and azimuth; $S_{\mathrm{det}}(\lambda,
+x, y)$ is the sensor quantum efficiency (QE) as a function of wavelength and
+position; $S_{\mathrm(opt)}(\lambda, t, x, y)$ is the transmission of the
+mirror and the optics; and $S_{\mathrm{filter}}(\lambda, x, y)$ is the
+transmission of the filter as a function of position.
+
+We must assume that these quantities are all constant over a given object
+footprint.  We further assume for Year 1 that (a) the filter transmission does
+not change with time; (b) the QE and filter transmission is constant over the
+scale of a detector; (c) there may be a (c).
+
+
+\subsection{Foregrounds and Backgrounds}
+
+What to do about foregrounds and backgrounds?
+
+\subsection{Dome Flats and Reference Flux Flats}
+
+This section will describe how we need to know the response to focused light,
+and what we need for a smooth background, and what we need to know from the CBP.
+
+
 \subsection{ISR Operation}
 
-Need sub-sub-sections.
+In this section, we describe the instrument signature removal (ISR) for
+LSSTCam.  After the photons hit the detector, there are a number of sensor
+effects that alter the image as photoelectrons are produced, they are collected
+in the detector, clocked and read out, and sent through the amplifier to the
+analog-to-digital converter (ADC).  Each of these steps can imprint an effect,
+including noise, non-linearities, cross-talk, etc.  Our goal in ISR is to apply
+corrections ``in reverse'' to go from the raw camera output (ADU in 16
+amplifiers) to a ``post ISR'' image in units of electrons that are equivalent
+to the number of photocarriers produced in each pixel incident on the camera.
+In this stage we do not correct for quantum efficiency as a function of
+wavelength, as that requires knowledge of each individual source SED.
+
+% If necessary we can add in a section about differential non-linearity corrections.
+
+\subsubsection{Overscan Correction}
+
+The first operation we must perform is ``overscan correction'' to remove the
+amplifier bias level.  Unfortunately, the bias level in LSSTCam is not
+completely stable with time, and thus we require a somewhat complicated
+overscan subtraction routine, using both serial overscan (the additional
+readout at the end of each row) and parallel overscan (the additional readout
+at the end of each column).
+
+First, we perform row-by-row serial overscan correction to remove possible bias
+drift and jumps.  [We are investigating a more complex algorithm for some amplifiers
+to reduce row-by-row noise.]  We have X overscan pixels per row, and we take
+the median of each row, skipping the first two columns, using the afw integer
+median sampling algorithm.  [This needs to be written down or referenced
+  somewhere].  This introduces approximately XX ADU of noise, which may or may
+not be comparable to our read noise, to be calculated.
+
+Next we need to apply parallel overscan subtraction.  One challenge of the
+parallel overscan subtraction is that hot columns and saturated stars bleed
+into the parallel overscan region, making these columns unusable for
+parallel overscan subtraction.  In addition, these bright signals inject a
+crosstalk signal into the other crosstalk regions.  Therefore, prior to
+parallel overscan subtraction we perform crosstalk correction on just the
+parallel overscan region.  As this is done after serial overscan subtraction
+(even into the parallel overscan region) this crosstalk correction does not
+require extra source detection or background estimation, as in the standard
+crosstalk correction described below.  Additionally, we mask the regions with
+the saturated parallel overscan and interpolate these.  Finally, we perform
+column-by-column parallel overscan correction.  This should be improved.
+
+Not every amplifier on every detector requires the parallel overscan
+correction.  Hopefully by the time we get to commissioning we can specify which
+amplifiers are problematic, and add a figure here which shows how that works.
+Alternatively, new smoother parallel overscan will help a lot everywhere.
+
+\subsubsection{Bias Subtraction}
+
+Next we subtract off any residual common-mode bias structure by subtracting off
+a median ``bias'' frame.  The combination of these is described in Section XX.
+
+\subsubsection{CTI Correction}
+
+We must now correct for charge-transfer inefficiency (CTI).  This is due to the
+fact that as charge is clocked along the either the serial direction (sCTI) or
+parallel direction (pCTI) some small fraction of charge is left behind.  Full
+details of our correction algorithm are in [Broughton et al.?].
+
+\subsubsection{Linearity Correction}
+
+We want to ensure that the response of the number of ADU counts that we measure
+is completely linear with the incident photons, over a very wide dynamic
+range.  We correct for non-linearities using a 10 node spline fit described in
+[Astier?].  The generation of the linearity spline fit is described in Section XX.
+
+\subsubsection{Gain Normalization}
+
+From the photon transfer curve (PTC) analysis [ref] we know the gain of each
+amplifier.  This might be a model as a function of temperature, TBD.  At this
+stage we explicitly normalize each amplifier on each detector to have units of
+electrons, with effective gain of 1.
+
+\subsubsection{Variance Plane Creation}
+
+We take the imaging plane and add the read noise per amplifier from the PTC
+analysis to create the image variance plane.
+
+\subsubsection{Crosstalk Correction}
+
+We now use crosstalk matrices derived by [ref] to correct the imaging region of
+each amplifier.  The crosstalk correction procedure first runs detection to
+mask sources and subtract off the background (is this really correct) to
+compute the signal that may crosstalk from each source to the other target
+amplifiers.  There is no inter-detector crosstalk in LSSTCam.
+
+\subsubsection{Defect Masking and Interpolation}
+
+Next all defects are masked and flagged with a ``BAD`` mask bit.  The defect
+finding code is described in [ref] or Section XX.
+
+\subsubsection{Brighter/Fatter Correction}
+
+The Brighter/Fatter effect (BFE) is the effect that as charge accumulates in a
+pixel it will distort the local electric field and push further photocharges
+away, making brighter objects have a slightly broader PSF.  The correction
+algorithm we apply is described in Broughton et al.  This correction is applied
+at this stage in the ISR because it is one of the first effects in the signal
+chain as the charge is accumulated in the detector.
+
+\subsubsection{Dark Subtraction}
+
+Finally, we subtract the dark frame which is computed from a full dark frame.
+The dark rate is quite small, adding only XX electrons per pixel for our
+typical 30s exposure time.
 
 \subsection{Applying Flats}
+
+As described above, flat fielding a wide field imager to our precision is
+particularly complicated.  We make use of two primary flats generated from
+calibration products, the ``background flat'' and the ``reference flux flat''.
+The first is used to flatten the \emph{background}, making background
+subtraction easier.  The second is used to flatten the \emph{photometry}
+without inducing other pixel-level distortions that confuse QE effects with
+pixel size effects.
+
+
+
 \subsection{Global Calibration}
 
 \section{Flat Field System}
