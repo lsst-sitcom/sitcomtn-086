@@ -12,6 +12,13 @@
 \newcommand{mtrue}{m_{\mathrm{true}}}
 \newcommand{deltam}{\delta_m}
 \newcommand{Deltam}{\Delta\,m}
+\newcommand{electron}{e^{-}}
+\newcommand{mobs}{m_b^{\mathrm{obs}}}
+\newcommand{mstd}{m_b^{\mathrm{std}}}
+\newcommand{Sobs}{S_b^{\mathrm{obs}}}
+\newcommand{Sstd}{S_b^{\mathrm{std}}}
+\newcommand{Iobs}{\mathcal{I}_0^{\mathrm{obs}}}
+\newcommand{Istd}{\mathcal{I}_0^{\mathrm{std}}}
 
 %If you want glossaries
 %\input{aglossary.tex}
@@ -100,15 +107,31 @@ The requirements on calibration are defined in the Science Requirements Document
     \item Transfer to physical flux scale (external absolute photometry)
 \end{enumerate}
 
-The requirements for photometric calibration accuracy are specified using the following error decomposition (valid in the limit of small errors):
+The requirements for photometric calibration accuracy are specified using the
+following error decomposition (valid in the limit of small errors):
+%
 \begin{equation}
     \mcat = mtrue +\sigma+\deltam (x,y,\theta,\alpha,\delta,\mathrm{SED},t)+\Deltam
 \end{equation}
-where $\mtrue$ is the true magnitude defined by eqs. 4 and 7, $\mcat$ is the cataloged LSST magnitude, $\sigma$ is the random photometric error (including random calibration errors and count extraction errors), and $\Deltam$ is the overall (constant) offset of the internal survey system from a perfect AB system (the six values of $\Deltam} are equal for all the cataloged objects).
-Here, $\deltam$ describes the various systematic dependencies of the internal zeropoint error around $\Deltam}, such as position in the field of view (x, y), the normalized system response ($\theta$), position on the sky ($\alpha$,$\delta$),and the source spectral energy distribution(SED).
-Note that the average of $\deltam$ over the cataloged area is 0 by construction.
+%
+where $\mtrue$ is the true magnitude defined by eqs. 4 and 7, $\mcat$ is the
+cataloged LSST magnitude, $\sigma$ is the random photometric error (including
+random calibration errors and count extraction errors), and $\Deltam$ is the
+overall (constant) offset of the internal survey system from a perfect AB
+system (the six values of $\Deltam} are equal for all the cataloged objects).
 
-The SRD allocates error specifications for the griz bands, with a 50\% increase expected for u and y bands. These high level allocations are further broken down to three main elements in Observatory System Specifications (LSE-30). These are Instrument Throughput, Atmospheric Transmittance, and Reference Star Catalogs. The full functional error budget can be found in LSST Document-9553.
+Here, $\deltam$ describes the various systematic dependencies of the internal
+zeropoint error around $\Deltam$, such as position in the field of view $(x,
+y)$, the normalized system response ($\theta$), position on the sky
+($\alpha$,$\delta$), and the source spectral energy distribution(SED).  Note
+that the average of $\deltam$ over the cataloged area is 0 by construction.
+
+The SRD allocates error specifications for the griz bands, with a 50\% increase
+expected for $u$ and $y$ bands. These high level allocations are further broken
+down to three main elements in Observatory System Specifications
+(LSE-30). These are Instrument Throughput, Atmospheric Transmittance, and
+Reference Star Catalogs. The full functional error budget can be found in LSST
+Document-9553.
 
 \begin{table}[|||]
 | Design Spec (millimag) | Repeatability | Uniformity | Color Accuracy | External Absolute Photometry |
@@ -118,22 +141,30 @@ The SRD allocates error specifications for the griz bands, with a 50\% increase 
 | Reference Catalog | 2.5 | 9 | 3 | - |
 
 \end{equation}
+%
+where $\textrm{m}_{true}$ is the true magnitude defined by eqs. 4 and 7,
+$\textrm{m}_{cat}$ is the cataloged LSST magnitude, $\sigma$ is the random
+photometric error (including random calibration errors and count extraction
+errors), and $\Deltam$ is the overall (constant) offset of the internal survey
+system from a perfect AB system (the six values of $\Deltam$ are equal for all
+the cataloged objects).  Here, $\deltam$ describes the various systematic
+dependencies of the internal zeropoint error around $\Deltam$, such as position
+in the field of view (x, y), the normalized system response ($\theta$),
+position on the sky ($\alpha$, $\delta$), and the source spectral energy
+distribution (SED).  Note that the average of $\deltam$ over the cataloged area
+is 0 by construction.
 
-where $\textrm{m}_{true}$ is the true magnitude defined by eqs. 4 and 7, 
-$\textrm{m}_{cat}$ is the cataloged LSST magnitude, $\sigma$ is the random photometric error (including random calibration errors and count extraction errors), and $\Delta$m is the overall (constant) offset of the internal survey system from a perfect AB system (the six values of $\Delta$m are equal for all the cataloged objects). 
-Here, $\delta$m describes the various systematic dependencies of the internal zeropoint error around $\Delta$m, such as position in the field of view (x, y), the normalized system response ($\theta$), position on the sky ($\alpha$, $\delta$), and the source spectral energy distribution (SED).
-Note that the average of $\delta$m over the cataloged area is 0 by construction.
-
-The SRD allocates error specifications for the griz bands, with a 50\% increase expected for u and y bands. 
-These high level allocations are further broken down to three main elements in Observatory System Specifications (LSE-30). 
-These are Instrument Throughput, Atmospheric Transmittance, and Reference Star Catalogs. 
-The full functional error budget can be found in LSST Document-9553.
+The SRD allocates error specifications for the griz bands, with a 50\% increase
+expected for $u$ and $y$ bands.  These high level allocations are further broken
+down to three main elements in Observatory System Specifications (LSE-30).
+These are Instrument Throughput, Atmospheric Transmittance, and Reference Star
+Catalogs.  The full functional error budget can be found in LSST Document-9553.
 
 \begin{table}
     \begin{tabular}{|c|c|c|c|c|}
-        \hline 
+        \hline
         Design Spec (millimag) & Repeatability & Uniformity & Color Accuracy & Abs. Photometry \\
-        \hline 
+        \hline
         \hline
         Overall Specification & 5 & 10 & 5 & 10 \\
         \hline
@@ -147,162 +178,334 @@ The full functional error budget can be found in LSST Document-9553.
 
 \end{table}
 
-From these functional requirements, requirements are allocated to the Telescope \& Site (LSE-60) and Data Management (LSE-61) systems to ensure that the functional requirements are met. 
+From these functional requirements, requirements are allocated to the Telescope
+\& Site (LSE-60) and Data Management (LSE-61) systems to ensure that the
+functional requirements are met.
 
-\section{Calibration Approach}
+\section{Instrumental Signature Reduction (ISR)}
 
-This section describes our overall approach to calibration.  There will need to
-be other papers detailing aspects.
+To be written soon!
 
-\subsection{Standard Bandpasses and Standard Sources}
+\section{Photometry with Chromatic Corrections}
 
 The fundamental goal of photometric calibration is to estimate the surface
-brightness of sources across the full sky in a uniform way.  Following B17, we
-define $I_*(\theta, \phi, \lambda, t)$ as the surface brightness at an
-arbitrary celestial coordinate $(\theta, \phi)$, with wavelength $\lambda$ at a
-given time $t$.  For LSST, all survey exposures are 30 seconds, taken in
-sequence, so $t$ uniquely identifies a given exposure.  The quantity $I_*$ has
-units of power per area per solid angle per wavelength.
+brightness of sources across the full sky in a uniform way, as would be
+measured at the top of the atmosphere (TOA).  Our general outline for uniform
+photometry follows DES and specifically B17 and BR18.  Our ground-based
+telescope will count only a fraction of photons from a celestial source that
+reaches the top of the Earth's atmosphere after attenuation from the
+atmosphere, filters, optics, and detector quantum efficiency.
 
-There is a different response to photons that are focused by the telescope and
-those that are not focused that is very relevant to the way we use flat fields,
-as discussed below.  For focused photons, our astrometric calibration can map
-photons at position $(x, y)$ to celestial coordinates.  The astrometric
-solution also yields the solid angle subtended by each pixel, which we assume
-is a nominal value $\Omega_0$ multipled by a relative scaling vector
-$\bf{\Omega}$ over the full camera array.  We further note that we must
-distinguish between images representing the surface brightness (at a pixel (a
-``surface brightness'' image) vs images representing the flux received in a
-pixel (a ``fluence image'').  These two images differ by a factor of
-$\bf{Omega}$.  We note that aperture fluxes assume fluence images, while
-model-fitting fluxes assume surface brightness images.
-
-Following B17, we can model the production of photo-electrons in the detectors
-from focused sky photons as the following, for each pixel at $(x, y)$:
-%
-\begin{equation}
-  \mathrm{Rate}(t, x, y) = \Omega_0 \int d\lambda
-  \frac{\lambda}{hc}A_{\mathrm{obs}}(\lambda, t, x, y) I_*(\lambda, t, x, y)
-  \Omega(\lambda, t, x, y)\\
-  = \frac{\Omega_0}{f_1 \times 1\,\mathrm{s}} \int d\lambda I_*(\lambda,
-  t, x, y)S_{\mathrm{std}}(\lambda)S_{\mathrm{obs}}(\lambda, t, x,
-  y)\Omega(\lambda, t, x, y)
-\end{equation}
-
-The value $A_{\mathrm{obs}}$ is the total collecting area times the
-transmission of the atmosphere and system, multiplied by the quantum efficiency
-of the individual pixel for a given observation.  The constant $1/f_1$ is the
-product of the effective area times the photon energy terms.  We define a
-dimensionless standard bandpass $S_{\mathrm{std}}(\lambda)$ represents the
-spectral response of the system for a typical pixel in typical (standard)
-observing conditions.  The function $S_{\mathrm{obs}}(\lambda, t)$ describes
-the spatio-temporal deviations from these reference conditions.  As discussed
-in BR18, these corrections are minimized with a well-chosen standard passband.
-As discussed below, there is an additional challenge with LSSTCam with two
-different types of sensors (E2V and ITL), with different characteristic quantum
-efficiency as a function of wavelength.  We are faced with a choice of
-optimizing our standard bandpass for the center of the focal plane with minimal
-corrections there and larger corrections at the edges, or for the full focal
-plane with moderate corrections everywhere.
-
-For a point source, the surface brightness incident on the focal plane is
-spread by the point spread function (PSF), normalized as:
-%
-\begin{equation}
-  I_*(\lambda, t, x, y) = \frac{f}{\Omega_0}F_*(\lambda)\mathrm{PSF}(\lambda,
-  t, x, y),
-\end{equation}
-%
-\begin{equation}
-  \Sum_{x,y}\mathrm{PSF}(\lambda, t, x, y)\Omega(\lambda, t, x, y) = 1
-\end{equation}
-%
-\begin{equation}
-  \int d_\lambda F_*(\lambda) S_{\mathrm{std}}(\lambda) = 1
-\end{equation}
-%
-Imaging cameras such as LSSTCam can only count photons and not their energy, a
-single epoch can only estimate the amplitude $f$ of the stellar flux, and not the
-full SED $F_*(\lambda)$.
-
-First, we start with the determination of $f$ for sources which share a
-standard reference spectrum $F_{\mathrm{std}}$.  We discuss the case of
-different SEDs in the following section.  The goal of photometric
-calibration is to ensure we get the same value for $f$ invariant of time or
-location on the focal plane.  To properly estimate $f$ from the $\mathrm{Rate}$
-image, we define a dimensionless ``reference flat''
-%
-\begin{equation}
-  r_{\mathrm{ref}}(t, x, y) = \int
-  d\lambda\,F_{\mathrm{std}}(\lambda)S_{\mathrm{std}}(\lambda)r(\lambda, t, x,
-  y)
-\end{equation}
-%
-and construct the fluence image, with units of counts:
-%
-\begin{equation}
-  \mathrm{Fluence}(t, x, y) \equiv T \frac{\mathrm{Rate}(t, x, y)}{r(t, x, y)}
-\end{equation}
-%
-with an exposure time $T$.  Under the assumption that the PSF and area factor
-$\Omega$ are independent of wavelength and the width of the PSF (admittedly
-naive assumptions; see [refs]), we can esimate the source flux with a simple
-sum over pixels in the footprint of the object:
-%
-\begin{equation}
-  \left ( \frac{1\,\mathrm{s}}{T} \right ) \Sum_{x, y} \mathrm{Fluence}(t, x,
-  y)\\
-  = \frac{f}{f_1}\frac{\int d\lambda
-    F_{\mathrm{std}}(\lambda)r_{\mathrm{ref}}(\lambda, t)\mathrm{PSF}(t, x,
-    y)\Omega(t, x, y)}{\int d\lambda F_{\mathrm{std}} r_{\mathrm{ref}}
-    r(\lambda, t, x, y)}\\
-  = \frac{f}{f_1}\Sum_{x, y} \mathrm{PSF}(t, x, y)\Omega(t, x, y)\\
-  = \frac{f}{f_1}
-\end{equation}
-%
-Therefore, the reference flat is the quantity we need to get uniform photometry
-across the survey.  While this can be roughly approximated by a dome flat
-field, as discussed in B17 this must be modified significantly to be suitable
-for accurate photometry.
+Our overall photometry plan follows BR18, in particular the use of the Forward
+Global Calibration Method (FGCM).  This global calibration algorithm uses
+repeated observations of stars in multiple bands, through multiple instrumental
+and atmospheric bandpasses, to simultaneously constrain the atmospheric model
+as well as standardized TOA star fluxes over a wide range of star colors.
 
 \subsection{Chromatic Corrections}
 
-We need to port over stuff from the FGCM paper on the chromatic corrections,
-specifically Section 2.  At least the outline.
-
-At this point, we need to decompose Eqn [above] into the components due to
-atmosphere, optics, and sensor.
+For broadband observations through the ${u,g,r,i,z,y}$ filters, the number of
+photoelectrons ($\electron$) produced by a source in a pixel is proportional to the
+integral of the TOA flux $F_\nu(\lambda)$ (the source spectral energy
+distribution, or SED) weighted by the observation
+transmission function, $S_b(x, y, \mathrm{alt}, \mathrm{az}, t, \lambda)$ in a
+given filter $b$.  We discuss the effect of integrating over the point spread
+function (PSF) and pixel size variations below.
 %
 \begin{equation}
-  A_b^{\mathrm{obs}} = A\,S^{\mathrm{atm}}(\lambda, t, \mathrm{alt}, \mathrm{az})\,S^{\mathrm{det}}(\lambda,
-  x, y)\,S^{\mathrm{opt}}(\lambda, x, y)\,S^{\mathrm{filter}}(\lambda, x, y)
+\electron_b = A \int_0^{\Delta T}dt \int_0^\infty
+F_\nu(\lambda) S_b(x, y, \mathrm{alt}, \mathrm{az}, t, \lambda)
+\frac{d\lambda}{h_{\mathrm{Pl}}\lambda},
 \end{equation}
 %
-where $A$ is the nominal collecting area, $S_{\mathrm{atm}}(\lambda, t,
-\mathrm{alt}, \mathrm{az})$ is the transmission of the atmosphere as a function
-of wavelength, time, altitude, and azimuth; $S_{\mathrm{det}}(\lambda,
-x, y)$ is the sensor quantum efficiency (QE) as a function of wavelength and
-position; $S_{\mathrm(opt)}(\lambda, t, x, y)$ is the transmission of the
-mirror and the optics; and $S_{\mathrm{filter}}(\lambda, x, y)$ is the
-transmission of the filter as a function of position.
+where $A$ is the area of the telescope pupil and $\Delta\,T$ is the duration of
+the exposure.  The position ${x, y}$ is the location in the focal plane;
+${\mathrm{alt}, \mathrm{az}}$ are the altitude and azimuth of the observation
+(the altitude being the more important driver of the variation of the
+transmission by the atmosphere as a function of airmass).  The units of flux
+$F_\nu(\lambda)$ are
+$\mathrm{erg}\,\mathrm{cm}^{-2}\,\mathrm{s}^{-1}\,\mathrm{Hz}^{-1}$, and the
+factor $\frac{d\lambda}{h_{\mathrm{Pl}\lambda}}$ counts the number of photons
+per unit energy at a given wavelength, where $h_{\mathrm{Pl}}$ is Planck's
+constant.
 
-We must assume that these quantities are all constant over a given object
-footprint.  We further assume for Year 1 that (a) the filter transmission does
-not change with time; (b) the QE and filter transmission is constant over the
-scale of a detector; (c) there may be a (c).
+Following BR18, we definte the ``observed passband'', which is position- and
+time-dependent, as such:
+%
+\begin{equation}
+\Sobs \equiv S_b(x, y, \mathrm{alt}, \mathrm{az}, t, \lambda).
+\end{equation}
+
+Following Fukugita et al. (1996), we define the AB magnitude of a source to be:
+%
+\begin{equation}
+\mobs = -2.5\,\mathrm{log}_{10} \left ( \frac{\int_0^{\infty}
+  F_\nu(\lambda)\,\Sobs\,\lambda^{-1}d\lambda}{\int_0^{\infty}
+  F^{\mathrm{AB}}\,\Sobs\,\lambda^{-1}d\lambda} \right ),
+\end{equation}
+%
+where $F^{\mathrm{AB}} = 3631\,\mathrm{Jy}$.  Putting this together with the
+above equation and simplifying we get:
+%
+\begin{equation}
+\mobs = -2.5\,\mathrm{log}_{10}(\electron_b) +
+2.5\,\mathrm{log}_{10}({\Delta}T) + 2.5\,\mathrm{log}_{10}(\Iobs) +
+\mathrm{ZPT}^{\mathrm{AB}},
+\end{equation}
+%
+where
+%
+\begin{equation}
+\mathrm{ZPT}^{\mathrm{AB}} = 2.5\,\mathrm{log}_{10} \left (
+\frac{A\,F^{\mathrm{AB}}}{h_{\mathrm{Pl}}} \frac ),
+\end{equation}
+%
+and $Iobs$ is defined as the integral over the observed passband $b$:
+%
+\begin{equation}
+\label{eqn:Iobs}
+\Iobs(b) \equiv \int_0^\infty \Sobs(\lambda)\,\lambda^{-1}\,d\lambda.
+\end{equation}
+%
+
+Note that in the formulation so far we are limited by the variety of observed
+passbands that are encountered in a survey, due to variations in instrument
+over the focal plane and atmosphere over time.  Furthermore, these equations
+require knowledge of the wavelength dependence of the source SED.  Therefore,
+we define a ``standard'' magnitude as the broadband magnitude that would be
+measured if a given source were observed through a standard passband $Sstd$
+that we are free to choose:
+%
+\begin{equation}
+\mstd \equiv -2.5\,\mathrm{log}_{10} \left ( \frac{\int_0^\infty
+  F_\nu(\lambda)\,\Sstd\,\lambda^{-1}\,d\lambda}{\int_0^\infty
+  F^{\mathrm{AB}}\,\Sstd\,\lambda^{-1}\,d\lambda} \right ).
+\end{equation}
+%
+The difference between this standard magnitude and the observed magnitude is
+then:
+%
+\begin{equation}
+\label{eqn:deltastd}
+\delta_b^{\mathrm{std}} \equiv \mstd - \mobs\\
+= 2.5\,\mathrm{log}_{10}(\Istd(b)/\Iobs(b))\\
++ 2.5\,\mathrm{log}_{10} \left ( \frac{\int_0^{\infty}
+  F_\nu(\lambda)\,\Sobs(\lambda)\,\lambda^{-1}\,d\lambda}{\int_0^{\infty}
+  F_\nu(\lambda)\,\Sstd(\lambda)\,\lambda^{-1}\,d\lambda} \right ),
+\end{equation}
+%
+where $\Istd$ is defined as in Eqn.~\ref{eqn:Iobs}.
+
+The decomposition in Eqn.~\ref{eqn:deltastd} is very useful.  First of all, the
+first term is independent of the SED, and the SED-dependent ``chromatic
+correction'' is entirely in the second term.  Second, the chromatic correction
+term goes to zero if either (a) the source SED is completely flat (as with the
+reference AB spectrum or (b) the observed passband $\Sobs(b)$ is equal to the
+standard passband $\Sstd(b)$.  Therefore, it is important to choose a standard
+passband as close to the ``typical'' observing conditions as possible in order
+to minimize the chromatic corrections, and to ensure that averaging over many
+observed passbands tends toward the mean (standard) passband.  For LSSTCam this
+is made more challenging by the different shapes of the QE curves of the two
+types of detectors (E2V and ITL), and so we must decide whether to choose one
+or the other shape as the standard, or to ``split the baby'' and choose
+something in the middle that is representative of neither.
+
+\subsection{Observed Passbands}
+
+We assume that the instrumental and atmospheric components of the observed
+passband are independent, and therefore we can decompose $\Sobs$ as such:
+%
+\begin{equation}
+\Sobs(\lambda) = S_b^{\mathrm{inst}}(x, y, t,
+\lambda)\,S^{\mathrm{atm}}(\mathrm{alt}, \mathrm{az}, t, \lambda),
+\end{equation}
+%
+where $S_b^{\mathrm{inst}}$ is the instrumental component that depends on
+location in the detector and focal plane, as well as time and wavelength, and
+$S_b^{\mathrm{atm}}$ is the atmospheric component that depends on pointing in
+the sky.  We address each of the instrumental and atmospheric transmission
+curves in turn.
+
+\subsection{Instrumental Response}
+
+We can decompose the instrumental response into different parts that depend on
+the focal plane and time in different ways.  Our initial decomposition is:
+%
+\begin{equation}
+S_b^{\mathrm{inst}}(x, y, t, \lambda) = k_b\,S^{\mathrm{refflat}}(x, y,
+\lambda)\,S^{\mathrm{optics}}(t, \lambda)\,S^{\mathrm{CBP}}(x, y, \lambda),
+\end{equation}
+%
+where $S^{\mathrm{refflat}}$ is the ``reference flux flat'' that normalizes the
+system response to focused light; $S^{\mathrm{optics}}$ describes the change in
+the opacity of the optical system over time; $S^{\mathrm{CBP}}$ is the
+in-situ chromatic throughput of the system as measured by the collimated beam
+projector; and $k_b$ is an overall throughput constant at the start of the
+survey that can be determined with observations of standard stars/white dwarfs.
+
+\subsubsection{Change in Opacity of Optical System}
+
+We break out the $S^{\mathrm{optics}}(t, \lambda)$ as a separate component,
+because to first order the dust on the optics and mirror build up smoothly over
+time, more frequently than we can or want to determine ``absolute'' calibrated
+throughput measurements.  In the original DES formalism described in BR18 this
+was only a gray term without wavelength dependence, with offsets determined
+whenever there was a mirror wash or hardware change.  Further experience with
+DES and Hyper Suprime Cam Special Survey Program (HSC; need ref) demonstrated
+that the mirror coating degrades chromatically over time due to molecular
+changes.  This chromatic change is visible in all bands, but is most dramatic
+in the bluest bands.  Therefore, we must allow a smooth degradation of
+$S^{\mathrm{optics}}$ as a function of wavelength (estimated as a first-order
+correction; I have to put the math somewhere in here).
+
+\subsubsection{In-situ Measurements of Chromatic Throughput from CBP}
+
+The term $S^{\mathrm{CBP}}$ describes the in-situ chromatic estimate (with an
+arbitrary normalization) from the ``static'' CBP: including the filter (as a
+function of wavelength and position); the mirrors M1, M2, and M3 (as a function
+of wavelength); the lenses L1, L2, ?? (as a function of wavelength); and the
+detector quantum efficience (QE) as a function of position.  For Y1
+calibrations we assume that $S^{\mathrm{CBP}}(x, y, \lambda)$ is constant for each
+detector, and will refine this in future versions of the calibration system.
+Overall, we expect that the CBP measurements should agree with lab data for
+detector QE and vendor measurements of filter throughput as a function of
+position.  Note that we could use monochromatic flats like the DECal system
+(ref) to achieve the same in-situ chromatic throughput estimation, although
+ghosting due to unfocused light makes this much easier with the CBP.
+
+\subsubsection{Reference Flux Flats}
+
+The term $S^{\mathrm{refflux}}$ is the reference flux flat which normalizes the
+response to focused light~(see, e.g. B17).  Nominally, this has chromatic
+variations at small scales (particularly the ITL detectors in the bluest
+bands), but for Y1 we are assuming any chromatic variations are assumed to be
+constant at the detector scale and described by the
+$S^{\mathrm{CBP}}(\lambda)$.  Therefore, this term is just the achromatic
+(gray) portion of the instrumental throughput which can vary from pixel to
+pixel.
+
+The reference flux flat has a few key differences from the ``dome flat'' which
+is obtained by measuring the response to a Lambertian source of light such as
+the dome screen.  First of all, the dome flat contains a factor of the pixel
+area $\Omega(x, y)$, which means that it assumes pixel size variations are QE
+variations.  Second, there are differences in focused and scattered light
+patterns from a flat field screen and distant sky sources.  Third, the dome
+flat is contaminated by scattered light.  Finally, the SED of the dome flat
+does not match the reference spectrum.  This final problem we will fix in
+future data processing by synthesizing broadband flats from narrow-band flats.
+Nevertheless, we still start with dome flats as they are the most efficient way
+of measuring the relative response of all the billions of pixels in LSSTCam on
+small scales.
+
+The dome flat is a good start for estimating the reference flax flat, but has
+issues at small scales and large scales.  At small scales, there are lateral
+electric field effects such as ``tree rings'' and the ``picture frame'' that
+are pixel size variations that show up as apparent QE variations in the dome
+flat.  At large scales, the response to focused light is different than the
+dome flat which includes unfocused and scattered light.
+
+To handle lateral electric field effects we fit templates based on our physical
+knowledge of the detectors.  This includes radial templates for tree rings with
+a fixed center, and square templates around the edge of the detectors.  The
+exact methodology is TBD.
+
+To handle large scale variations for LSST Y1 we use a ``star flat'' generated
+from a sequence of multi-band dithered observations of a moderately dense star
+field.  These observations are cross-calibrated using FGCM to generate
+per-detector polynomial approximations of the throughput relative to the dome
+flat at scales of hundreds of pixels and greater.  By making use of stars of
+various colors, the FGCM solution can approximate the star flat terms for a
+flat reference spectrum.
+
+In the future, we plan to use what we call the ``dynamic'' CBP, where the
+synthetic stars from the CBP are dithered around the full focal plane.  The
+advantage of this is that the response can be more carefully controlled, and it
+can be performed in narrow wavelength steps to build up the dynamic CBP star
+flat with any arbitrary spectrum.  The software to perform this analysis will
+not be ready by the completion of construction.
+
+\subsection{Atmosphere Response}
+
+The attenuation of light due as it propagates through the atmosphere includes
+absorption and Rayleigh scattering from molecular constituents (primarily $O_2$
+and $O_3$); absorption by preciptable water vapor (PWV), Mie scattering by
+airborne particulate aerosols that have physical sizes comparable to the
+wavelength of visible light; and shadowing by ice crystals and water droplets
+in clouds that is independent of wavelength.
+
+This can be summarized with the following equation:
+%
+\begin{equation}
+S^{\mathrm{atm}}(\mathrm{alt}, \mathrm{az}, t, \lambda) =
+S^{\mathrm{molecular}}(\mathrm{bp}, \mathrm{zd}, t,
+\lambda)\,S^{\mathrm{PWV}}(\mathrm{zd}, t,
+\lambda)\,e^{-(X(\mathrm{zd})\,\tau(t, \lambda))},
+\end{equation}
+%
+where $S^{\mathrm{molecular}}$ is the absorption and scattering from dry gasses
+(primarily in the u, g, and r bands); $S^{\mathrm{PWV}}$ is the absorption by
+water vapor (primarily in the z and y bands); $\tau$ is the aerosol optical
+depth (AOD); $X$ is the airmass; and $\mathrm{bp}$ is the barometric pressure.
+
+Following FGCM, we obtain the molecular scattering using MODTRAN (ref) combined
+with the barometric pressure, which is obtained as part of the standard suite
+of weather data at Cerro Pachon.  Ozone absorption can be parameterized by one
+parameter per night.  All constituent throughputs are computed as a function of
+zenith distance (airmass) in finite steps and interpolated at each wavelength step.
+
+The PWV may vary through the night and as a function of position in the sky.
+In the FGCM default model the PWV is allowed to vary via a smooth quadratic
+function through the night.  It may also be estimated per visit in the z and y
+bands by using the relative shift of stars of different colors.  As above, we
+use MODTRAN to determine the absorption as a function of wavelength for a grid
+of PWV and zenith distance values which are then interpolated.
+
+The aerosol model is a simple Angstrom model with one particular species:
+%
+\begin{equation}
+\tau(\lambda) = \tau_{7750}\,(\lambda/7750\,\Angstrom)^{-\alpha},
+\end{equation}
+%
+where the normalization $\tau_{7750}$ and optical index $\alpha$ depnd on the
+density, size, and shape of the particulates.  As with PWV, the AOD
+normalization is allowed to vary linearly through the night, while the optical
+index is given a single night.
+
+\subsection{Auxiliary Telescope}
+
+The Auxiliary Telescope (AuxTel) will be in operation during the LSST survey,
+obtaining contemporaneous estimates of the atmospheric throughput via low
+resolution spectroscopy of bright (sixth magnitude) stars.  The mode of
+operation of AuxTel has not yet been finally determined.  We are likely to use
+different modes in observing when LSST is targeting $ugri$ bands (where more
+care needs to be taken with the aerosols and ozone) and when LSST is targeting
+the $zy$ bands (where we need to know the PWV to high precision).
+
+In the first iteration, we plan on using the AuxTel model outputs to validate
+the FGCM atmospheric model which is determined from the broadband multi-color
+photometry of the stars observed on a given night.  In the future, we may use
+AuxTel to provide priors on the atmospheric model fit.  Considerable care will
+have to be taken to ensure that outliers from the spectroscopic fits do not
+contaminate the model used in the broadband photometry.  We do not plan to use
+satellite measurements of atmospheric constituents as priors as the resolution
+is low enough to be contaminated by observations of neighboring valleys rather
+than the mountain peak where the telescope is sited.
+
+\subsection{Integrating Over Sources}
+
+This short section will discuss PSF modeling and aperture photometry and the
+finit size of stars (and galaxies) and the care that needs to be taken with
+fluence or surface density images, following B17.
 
 
 \subsection{Foregrounds and Backgrounds}
 
-What to do about foregrounds and backgrounds?
-
-\subsection{Dome Flats and Reference Flux Flats}
-
-This section will describe how we need to know the response to focused light,
-and what we need for a smooth background, and what we need to know from the CBP.
-
+What to do about foregrounds and backgrounds, including fringes?  These needs
+to be written.
 
 \subsection{ISR Operation}
+
+*TO BE UPDATED AND MOVED*
 
 In this section, we describe the instrument signature removal (ISR) for
 LSSTCam.  After the photons hit the detector, there are a number of sensor
