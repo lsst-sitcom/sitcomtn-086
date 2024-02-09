@@ -199,7 +199,7 @@ analog-to-digital converter (ADC).  Each of these steps can imprint an effect,
 including adding noise, non-linearities, cross-talk, etc.  Our goal in ISR is
 to apply corrections ``in reverse'' to go from the raw camera output of Analog
 to Digital Units (ADU) in 16 amplifiers to a ``post ISR'' image in units of
-electrons ($\electron$) that are equiavlent to the number of photocarriers
+electrons ($\etron$) that are equiavlent to the number of photocarriers
 produced in each pixel incident on the camera.  In this stage we do not correct
 for quantum efficiency as a function of wavelength, as that requires knowledge
 of each individual source SED.  We leave the wavelength dependent effects to
@@ -295,7 +295,7 @@ a small dependence on readout board (REB) temperature ($\approx
 ensure that ...
 
 Using the photon transfer curve (PTC) analysis (ref) we are able to measure the
-gain ($\elec/\mathrm{ADU}$) for each amplifier
+gain ($\etron/\mathrm{ADU}$) for each amplifier
 
 \subsection{CTI Correction}
 
