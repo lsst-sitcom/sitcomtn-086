@@ -184,9 +184,126 @@ functional requirements are met.
 
 \section{Instrumental Signature Reduction (ISR)}
 
-To be written soon!
+In this section, we describe the instrument signature removal (ISR) for
+LSSTCam.  After the photons hit the detector surface, there are a number of
+sensor effects that alter the image as photoelectrons are produced, collected
+in the detector, clocked and read out, and sent through the amplifier(s) to the
+analog-to-digital converter (ADC).  Each of these steps can imprint an effect,
+including adding noise, non-linearities, cross-talk, etc.  Our goal in ISR is
+to apply corrections ``in reverse'' to go from the raw camera output of Analog
+to Digital Units (ADU) in 16 amplifiers to a ``post ISR'' image in units of
+electrons ($\electron$) that are equiavlent to the number of photocarriers
+produced in each pixel incident on the camera.  In this stage we do not correct
+for quantum efficiency as a function of wavelength, as that requires knowledge
+of each individual source SED.  We leave the wavelength dependent effects to
+the photometric calibration described in Section~\ref{sec:photocal}.
+
+% If necessary we can add in a section about differential non-linearity corrections.
+
+\subsection{Overscan Correction}
+
+The first operation we must perform is ``overscan correction'' to remove the
+amplifier bias level.  Unfortunately, for many channels the bias level in
+LSSTCam is not completely stable with time, and thus we support a somewhat
+complicated overscan subtraction routine, using both serial overscan (the
+additional readout at the end of each row) and parallel overscan (the
+additional readout at the end of each column).  The software may be configured
+to use specialized overscan settings on a per-detector and per-amplifier basis.
+
+In our default mode, we first perform row-by-row serial overscan correction to
+remove the bias level as well as possible bias drift and jumps.  We have X
+overscan pixels per row, and we take the median of each row, skipping the first
+two columns, using the LSST Science Pipelines integer median sampling algorithm
+(ref?).  This introduces approximately XX ADU of noise, which may or may not be
+comparable to our read noise (TBD).
+
+For some amplifier channels we need to additionally perform parallel overscan
+subtraction.  One challenge of the parallel overscan subtraction is that hot
+columns and saturated stars bleed into the parallel overscan region, making
+these columns unusable for parallel overscan subtraction.  In addition, these
+bright signals inject a crosstalk signal into the other crosstalk regions.
+Therefore, prior to parallel overscan subtraction we perform crosstalk
+correction on just the parallel overscan region (see Section~\ref{sec:xtalk}
+for details on the crosstalk correction algorithm).  Additionally, we mask the
+regions with saturated parallel overscan and interpolate along the columns.
+Finally, we perform column-by-column parallel overscan correction.
+
+\subsection{Saturation Flagging}
+
+After overscan correction, we must flag pixels that are deemed to be
+``saturated'' to ensure that these are handled correctly in the following ISR
+steps.  We have yet to determine which definition of saturation/full-well is
+appropriate.  Possible definitions include (a) the PTC turnoff (where the
+variance of pixel estimates deviates significantly from Poisson); (b) the level
+at which the charge-transfer-inefficiency (see Sec~\ref{sec:cti}) cannot be
+corrected; (c) the maximum possible observed value in a pixel; (d) the level above
+which the E2V sensors exhibit persistence effects.
+
+\subsection{Linearity Correction}
+
+The response of the readout system is not completely linear, as the
+amplification of the voltage in the sense node of the amplifier may not be
+completely linear.  [There are other sources of non-linearity; this seems to be
+the best place to do this correction, and I would like RHL help in describing
+these.]
+
+Our linearity correction model is a multi-node spline as original defined by
+P. Astier (ref?).  The linearity correction per amplifier is derived from a
+series of flat pairs illuminated at different flux levels and contemporaneously
+monitored with a photodiode.  We need to take special care in accounting for
+the different illumination patterns when the LED is used with different current
+levels, as well as stray light, and gain variation as a function of temperature
+(described below).
+
+\subsection{Crosstalk Correction}
+
+Every time a pixel is clocked out through an amplifier, there is an effect on
+the voltages in the other amplifiers on the same detector.  This crosstalk
+signal must be corrected by a full matrix for each detector that describes the
+effect of each ``source'' amplifier on every ``target'' amplifier.  The
+crosstalk values for LSSTCam are around XX.  Furthermore, there is a
+non-linearity in the crosstalk response of the LSSTCam amplifiers.  These are
+modeled as a first-order correction to the crosstalk matrix as a function of
+source signal level (A. Snyder, thesis).
+
+The crosstalk matrix coefficients were derived by A. Snyder using ``blobs''
+projected onto LSSTCam.  I do not know how much detail is needed here.
+
+\subsection{Bias Subtraction}
+
+After correcting for all of these effects, there may be some residual imprint
+of some bias structure.  To generate a bias frame to subtract from the image we
+take a series of zero-second integrations, perform the above ISR correction
+steps in order, and take the median.  Note that it is important to perform
+crosstalk correction prior to bias frame creation to ensure that the crosstalk
+signal from hot columns is corrected or else these will get imprinted on all of
+the amplifier segments which is undesirable.
+
+\subsection{Gain Normalization}
+
+In this step we convert the units of each amplifier from ADU to $\etron$ using
+the gain measurement.  This is a two step process, as we know that the gain has
+a small dependence on readout board (REB) temperature ($\approx
+0.06\%/{^\circ}C$), and we must correct for any small temperature shifts to
+ensure that ...
+
+Using the photon transfer curve (PTC) analysis (ref) we are able to measure the
+gain ($\elec/\mathrm{ADU}$) for each amplifier
+
+\subsection{CTI Correction}
+
+\subsection{Variance Plane Creation}
+
+\subsection{Defect Masking and Interpolation}
+
+\subsection{Dark Subtraction}
+
+\subsection{Brighter-Fatter Correction}
+
+\subsection{Applying Flat Fields}
 
 \section{Photometry with Chromatic Corrections}
+\label{sec:photocal}
 
 The fundamental goal of photometric calibration is to estimate the surface
 brightness of sources across the full sky in a uniform way, as would be
