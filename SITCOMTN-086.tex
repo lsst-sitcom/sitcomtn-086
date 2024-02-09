@@ -1,5 +1,5 @@
-\documentclass[SE,authoryear,toc]{article}
-%\input{meta}
+\documentclass[SE,authoryear,lsstdraft,toc]{lsstdoc}
+\input{meta}
 
 % Package imports go here.
 
@@ -8,17 +8,17 @@
 \usepackage{subcaption}
 
 % Local commands go here.
-\newcommand{mcat}{m_{\mathrm{cat}}}
-\newcommand{mtrue}{m_{\mathrm{true}}}
-\newcommand{deltam}{\delta_m}
-\newcommand{Deltam}{\Delta\,m}
-\newcommand{electron}{e^{-}}
-\newcommand{mobs}{m_b^{\mathrm{obs}}}
-\newcommand{mstd}{m_b^{\mathrm{std}}}
-\newcommand{Sobs}{S_b^{\mathrm{obs}}}
-\newcommand{Sstd}{S_b^{\mathrm{std}}}
-\newcommand{Iobs}{\mathcal{I}_0^{\mathrm{obs}}}
-\newcommand{Istd}{\mathcal{I}_0^{\mathrm{std}}}
+\newcommand{\mcat}{m_{\mathrm{cat}}}
+\newcommand{\mtrue}{m_{\mathrm{true}}}
+\newcommand{\deltam}{\delta_m}
+\newcommand{\Deltam}{\Delta\,m}
+\newcommand{\etron}{e^{-}}
+\newcommand{\mobs}{m_b^{\mathrm{obs}}}
+\newcommand{\mstd}{m_b^{\mathrm{std}}}
+\newcommand{\Sobs}{S_b^{\mathrm{obs}}}
+\newcommand{\Sstd}{S_b^{\mathrm{std}}}
+\newcommand{\Iobs}{\mathcal{I}_0^{\mathrm{obs}}}
+\newcommand{\Istd}{\mathcal{I}_0^{\mathrm{std}}}
 
 %If you want glossaries
 %\input{aglossary.tex}
@@ -33,26 +33,27 @@
 Parker Fagrelius, Eli Rykoff
 }
 
-% \setDocRef{SITCOMTN-086}
-% \setDocUpstreamLocation{\url{https://github.com/lsst-sitcom/sitcomtn-086}}
+\setDocRef{SITCOMTN-086}
+\setDocUpstreamLocation{\url{https://github.com/lsst-sitcom/sitcomtn-086}}
 
 \date{\vcsDate}
 
 % Optional: name of the document's curator
 % \setDocCurator{The Curator of this Document}
 
-% \setDocAbstract{
-% Current baseline plan for the year 1 minimum viable product as delivered for ORR.
-% }
+ \setDocAbstract{
+ Current baseline plan for the year 1 minimum viable product as delivered for ORR.
+ }
 
 % Change history defined here.
 % Order: oldest first.
 % Fields: VERSION, DATE, DESCRIPTION, OWNER NAME.
 % See LPM-51 for version number policy.
-% \setDocChangeRecord{
-%   \addtohist{1}{YYYY-MM-DD}{Unreleased.}{Parker Fagrelius}
-% }
+ \setDocChangeRecord{
+   \addtohist{1}{2023-XX-XX}{Unreleased.}{Parker Fagrelius}
+ }
 
+\setcounter{tocdepth}{2}
 
 \begin{document}
 
@@ -61,8 +62,6 @@ Parker Fagrelius, Eli Rykoff
 % Frequently for a technote we do not want a title page  uncomment this to remove the title page and changelog.
 % use \mkshorttitle to remove the extra pages
 
-
-\appendix
 
 \section{Introduction}
 
@@ -118,7 +117,7 @@ where $\mtrue$ is the true magnitude defined by eqs. 4 and 7, $\mcat$ is the
 cataloged LSST magnitude, $\sigma$ is the random photometric error (including
 random calibration errors and count extraction errors), and $\Deltam$ is the
 overall (constant) offset of the internal survey system from a perfect AB
-system (the six values of $\Deltam} are equal for all the cataloged objects).
+system (the six values of $\Deltam$ are equal for all the cataloged objects).
 
 Here, $\deltam$ describes the various systematic dependencies of the internal
 zeropoint error around $\Deltam$, such as position in the field of view $(x,
@@ -133,14 +132,22 @@ down to three main elements in Observatory System Specifications
 Reference Star Catalogs. The full functional error budget can be found in LSST
 Document-9553.
 
-\begin{table}[|||]
-| Design Spec (millimag) | Repeatability | Uniformity | Color Accuracy | External Absolute Photometry |
-| Overall Specification | 5 | | 10 | 5 | 10 |
-| Instrument Throughput | 3 | 2 | 3 | - |
-| Atmospheric Transmittance | 3.5 | 4 | 3 | - |
-| Reference Catalog | 2.5 | 9 | 3 | - |
-
-\end{equation}
+\begin{table}
+\centering
+\begin{tabular}{|c|c|c|c|c|}
+\hline
+Design Spec & Repeatability & Uniformity & Color Accuracy & External Absolute  \\
+ (millimag) &  &  &  & Photometry \\
+\hline\hline
+Overall Specification & 5 &  10 & 5 & 10 \\
+Instrument Throughput & 3 & 2 & 3 & -  \\
+Atmospheric Transmittance & 3.5 & 4 & 3 & - \\
+Reference Catalog & 2.5 & 9 & 3 & - \\
+\hline
+\end{tabular}
+\caption{TABLE NAME NEEDED}
+\label{tab:table1}
+\end{table}
 %
 where $\textrm{m}_{true}$ is the true magnitude defined by eqs. 4 and 7,
 $\textrm{m}_{cat}$ is the cataloged LSST magnitude, $\sigma$ is the random
@@ -192,7 +199,7 @@ analog-to-digital converter (ADC).  Each of these steps can imprint an effect,
 including adding noise, non-linearities, cross-talk, etc.  Our goal in ISR is
 to apply corrections ``in reverse'' to go from the raw camera output of Analog
 to Digital Units (ADU) in 16 amplifiers to a ``post ISR'' image in units of
-electrons ($\electron$) that are equiavlent to the number of photocarriers
+electrons ($\etron$) that are equiavlent to the number of photocarriers
 produced in each pixel incident on the camera.  In this stage we do not correct
 for quantum efficiency as a function of wavelength, as that requires knowledge
 of each individual source SED.  We leave the wavelength dependent effects to
@@ -288,7 +295,7 @@ a small dependence on readout board (REB) temperature ($\approx
 ensure that ...
 
 Using the photon transfer curve (PTC) analysis (ref) we are able to measure the
-gain ($\elec/\mathrm{ADU}$) for each amplifier
+gain ($\etron/\mathrm{ADU}$) for each amplifier
 
 \subsection{CTI Correction}
 
@@ -322,7 +329,7 @@ as well as standardized TOA star fluxes over a wide range of star colors.
 \subsection{Chromatic Corrections}
 
 For broadband observations through the ${u,g,r,i,z,y}$ filters, the number of
-photoelectrons ($\electron$) produced by a source in a pixel is proportional to the
+photoelectrons ($\etron$) produced by a source in a pixel is proportional to the
 integral of the TOA flux $F_\nu(\lambda)$ (the source spectral energy
 distribution, or SED) weighted by the observation
 transmission function, $S_b(x, y, \mathrm{alt}, \mathrm{az}, t, \lambda)$ in a
@@ -330,7 +337,7 @@ given filter $b$.  We discuss the effect of integrating over the point spread
 function (PSF) and pixel size variations below.
 %
 \begin{equation}
-\electron_b = A \int_0^{\Delta T}dt \int_0^\infty
+\etron_b = A \int_0^{\Delta T}dt \int_0^\infty
 F_\nu(\lambda) S_b(x, y, \mathrm{alt}, \mathrm{az}, t, \lambda)
 \frac{d\lambda}{h_{\mathrm{Pl}}\lambda},
 \end{equation}
@@ -365,18 +372,18 @@ where $F^{\mathrm{AB}} = 3631\,\mathrm{Jy}$.  Putting this together with the
 above equation and simplifying we get:
 %
 \begin{equation}
-\mobs = -2.5\,\mathrm{log}_{10}(\electron_b) +
+\mobs = -2.5\,\mathrm{log}_{10}(\etron_b) +
 2.5\,\mathrm{log}_{10}({\Delta}T) + 2.5\,\mathrm{log}_{10}(\Iobs) +
 \mathrm{ZPT}^{\mathrm{AB}},
 \end{equation}
 %
 where
-%
+
 \begin{equation}
-\mathrm{ZPT}^{\mathrm{AB}} = 2.5\,\mathrm{log}_{10} \left (
-\frac{A\,F^{\mathrm{AB}}}{h_{\mathrm{Pl}}} \frac ),
+\mathrm{ZPT}^{\mathrm{AB}} = 2.5\,\mathrm{log}_{10}
+ \left (\frac{A\,F^{\mathrm{AB}}}{h_{\mathrm{Pl}}} \right ),
 \end{equation}
-%
+
 and $Iobs$ is defined as the integral over the observed passband $b$:
 %
 \begin{equation}
@@ -858,7 +865,7 @@ The azimuth and elevation stages are absolutely encoded with a Renishaw 26-bit o
     \centering
     \includegraphics[width=\textwidth]{cbp_drawing.png}
     \caption{CBP Major subsystems}
-    \label{fig:laser_power}
+    \label{fig:cbp_major_subsystems}
 \end{figure}
 
 At the focal plane sits the mask stage, which can hold 5 different masks. The masks can be rotated, driven by worm gears such that all masks are rotated on a common shaft by a single motor. The center mask stage is position encoded using a Renishaw absolute rotary encoder. The mask holder can hold masks with a diameter of 50 mm. Each mask will be laser etched into aluminium and are removable/interchangeable. 
@@ -881,19 +888,11 @@ Using \url{https://www.labsphere.com/wp-content/uploads/2021/09/Integrating-Sphe
 \section{Plans Post-Year 1}
 \subsection{Synethetic SED matched flats}
 \subsection{Full CBP dataset}
-% Include all the relevant bib files.
-% https://lsst-texmf.lsst.io/lsstdoc.html#bibliographies
-\section{References} \label{sec:bib}
-\renewcommand{\refname}{} % Suppress default Bibliography section
-\bibliography{local,lsst,lsst-dm,refs_ads,refs,books}
 
-% Make sure lsst-texmf/bin/generateAcronyms.py is in your path
+
+ Make sure lsst-texmf/bin/generateAcronyms.py is in your path
 \appendix
 \section{Calibration Products List}
-
-
-\section{Acronyms} \label{sec:acronyms}
-\input{acronyms.tex}
 
 \begin{table}[h!]
     \begin{tabular}{|c|c|}
@@ -925,7 +924,7 @@ Using \url{https://www.labsphere.com/wp-content/uploads/2021/09/Integrating-Sphe
     \hline
      & “White” light flats (ugrizy) \\ 
     \hline
-    \textdf{T}(det, $\lambda$) & Transmission \\ 
+    \textbf{T}(det, $\lambda$) & Transmission \\ 
     \hline
      & Dust flat (?) \\
     \hline
@@ -942,13 +941,17 @@ Using \url{https://www.labsphere.com/wp-content/uploads/2021/09/Integrating-Sphe
     \end{tabular}
 \end{table}
 
-% \section{Acronyms} \label{sec:acronyms}
-% \input{acronyms.tex}
+
+% Include all the relevant bib files.
+% https://lsst-texmf.lsst.io/lsstdoc.html#bibliographies
+\section{References} \label{sec:bib}
+\renewcommand{\refname}{} % Suppress default Bibliography section
+\bibliography{local,lsst,lsst-dm,refs_ads,refs,books}
+
+\section{Acronyms} \label{sec:acronyms}
+\input{acronyms.tex}
 % If you want glossary uncomment below -- comment out the two lines above
 %\printglossaries
-
-
-
 
 
 \end{document}
