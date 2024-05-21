@@ -42,7 +42,10 @@ Parker Fagrelius, Eli Rykoff
 % \setDocCurator{The Curator of this Document}
 
  \setDocAbstract{
- Current baseline plan for the year 1 minimum viable product as delivered for ORR.
+   Baseline calibration plan describing the as-built system to be
+   delivered at the time of the Operations Readiness Review (ORR), and for use
+   during Year 1 of the Rubin Observatory Legacy Survey of Space and Time
+   (LSST).
  }
 
 % Change history defined here.
@@ -76,20 +79,22 @@ airmass; spatial variations in the filter and detectors; pixel size variations;
 and various sensor effects such as charge transfer ineffeciency (CTI) and the
 Brighter Fatter Effect (BFE).
 
-This technote describes the baseline photometric calibration plan for Rubin
-Commissioning and the first year of data release production for the LSST
-Survey.  This includes plans on performing instrumental signature reduction
-(ISR), which is also known as ``detrending''; correct flat-fielding;
-background/foreground subtraction; and derivation of a uniform photometric
-calibration over the full survey.  It also includes plans for generating
-``calibration frames'' such as bias, darks, and various types of flats,
-incorporating LEDs, a class 4 tunable laser, and a novel Collimated Beam
-Projector (CBP).  We expect that this is not the final calibration plan for the
-LSST survey, but rather a first minimal viable product suitable for the first
-year of survey observations to meet our required goals for repeatability and
-uniformity.  Further improvements are planned to incorporate more effects,
-although our plan is to take as much calibration data early on to be able to
-reprocess early data with improved algorithms.
+This technote describes the baseline photometric calibration plan to be
+delivered by Rubin Construction and to be used in Data Release Production (DRP)
+during at least the first year of the LSST.  It includes plans for performing
+instrumental signature removal (ISR), which is also known as ``detrending'';
+correct flat-fielding; background/foreground subtraction; and derivation of a
+uniform photometric calibration over the full survey.  It also includes plans
+for generating ``calibration frames'' such as biases, darks, and various types
+of flats, incorporating LEDs, a class 4 tunable laser, and a novel Collimated
+Beam Projector (CBP).  We expect that this is not the final calibration plan
+for the LSST survey, but rather an initial baseline suitable for the first year
+of survey observations that will meet our required goals for photometric
+repeatability and uniformity.  Further improvements are planned in the future
+to address effects such as parallel CTI, persistence, and other effects that
+are not mitigated by the minimal system described in this document. We plan to
+take as much calibration data early on in the survey with the intent to
+reprocess these data later with improved algorithms.
 
 The calibration plan in this technote is heavily influenced by the Dark Energy
 Survey, which achieved better than $2~\mathrm{mmag}$ uniformity over
@@ -98,7 +103,10 @@ particular, we refer the reader to Bernstein et al. 2017 (henceforth B17) and
 Burke, Rykoff, et al. 2018 (henceforth BR18).
 
 \section{Requirements}
-The requirements on calibration are defined in the Science Requirements Document (LPM-17). The photometric quality and accuracy of the LSST data products is driven by four main components:
+
+The requirements on calibration are defined in the LSST Science Requirements
+Document (LPM-17). The photometric quality and accuracy of the LSST data
+products is driven by four main components:
 \begin{enumerate}
     \item Relative photometry (repeatability)
     \item Stability across the sky (spatial uniformity)
@@ -125,8 +133,8 @@ y)$, the normalized system response ($\theta$), position on the sky
 ($\alpha$,$\delta$), and the source spectral energy distribution(SED).  Note
 that the average of $\deltam$ over the cataloged area is 0 by construction.
 
-The SRD allocates error specifications for the griz bands, with a 50\% increase
-expected for $u$ and $y$ bands. These high level allocations are further broken
+The SRD allocates error specifications for g,r,i bands, with a 50\% increase
+expected for u,z,y bands. These high level allocations are further broken
 down to three main elements in Observatory System Specifications
 (LSE-30). These are Instrument Throughput, Atmospheric Transmittance, and
 Reference Star Catalogs. The full functional error budget can be found in LSST
@@ -145,7 +153,8 @@ Atmospheric Transmittance & 3.5 & 4 & 3 & - \\
 Reference Catalog & 2.5 & 9 & 3 & - \\
 \hline
 \end{tabular}
-\caption{TABLE NAME NEEDED}
+\caption{Requirements for repeatability, uniformity, color accuracy, and
+  absolute photometric zeropoint for the LSST survey.}
 \label{tab:table1}
 \end{table}
 %
@@ -199,7 +208,7 @@ analog-to-digital converter (ADC).  Each of these steps can imprint an effect,
 including adding noise, non-linearities, cross-talk, etc.  Our goal in ISR is
 to apply corrections ``in reverse'' to go from the raw camera output of Analog
 to Digital Units (ADU) in 16 amplifiers to a ``post ISR'' image in units of
-electrons ($\etron$) that are equiavlent to the number of photocarriers
+electrons ($\etron$) that are equivalent to the number of photocarriers
 produced in each pixel incident on the camera.  In this stage we do not correct
 for quantum efficiency as a function of wavelength, as that requires knowledge
 of each individual source SED.  We leave the wavelength dependent effects to
@@ -240,11 +249,17 @@ Finally, we perform column-by-column parallel overscan correction.
 After overscan correction, we must flag pixels that are deemed to be
 ``saturated'' to ensure that these are handled correctly in the following ISR
 steps.  We have yet to determine which definition of saturation/full-well is
-appropriate.  Possible definitions include (a) the PTC turnoff (where the
-variance of pixel estimates deviates significantly from Poisson); (b) the level
-at which the charge-transfer-inefficiency (see Sec~\ref{sec:cti}) cannot be
-corrected; (c) the maximum possible observed value in a pixel; (d) the level above
-which the E2V sensors exhibit persistence effects.
+appropriate.  Possible definitions include (a) the photon transfer curve (PTC)
+turnoff (where the variance of pixel estimates deviates significantly from
+Poisson); (b) the level at which the charge-transfer-inefficiency (see
+Sec~\ref{sec:cti}) cannot be corrected; (c) the maximum possible observed value
+in a pixel; (d) the level above which the E2V sensors exhibit persistence
+effects. Most likely we will need multiple definitions of ``saturation'', with
+pixels treated and flagged separately. For example, the different saturation
+definitions above have the following effects: (a) the error estimate may be
+biased; (b) PSF fluxes will be biased but aperture fluxes will be fine; (c)
+there will be charge bleeds that need to be interpolated; (d) we need to
+correct subsequent images based on the pixels that are above this threshold.
 
 \subsection{Linearity Correction}
 
@@ -262,40 +277,29 @@ the different illumination patterns when the LED is used with different current
 levels, as well as stray light, and gain variation as a function of temperature
 (described below).
 
-\subsection{Crosstalk Correction}
-\label{sec:xtalk}
-
-Every time a pixel is clocked out through an amplifier, there is an effect on
-the voltages in the other amplifiers on the same detector.  This crosstalk
-signal must be corrected by a full matrix for each detector that describes the
-effect of each ``source'' amplifier on every ``target'' amplifier.  The
-crosstalk values for LSSTCam are around XX.  Furthermore, there is a
-non-linearity in the crosstalk response of the LSSTCam amplifiers.  These are
-modeled as a first-order correction to the crosstalk matrix as a function of
-source signal level (A. Snyder, thesis).
-
-The crosstalk matrix coefficients were derived by A. Snyder using ``blobs''
-projected onto LSSTCam.  I do not know how much detail is needed here.
-
 \subsection{Bias Subtraction}
 
-After correcting for all of these effects, there may be some residual imprint
-of some bias structure.  To generate a bias frame to subtract from the image we
-take a series of zero-second integrations, perform the above ISR correction
-steps in order, and take the median.  Note that it is important to perform
-crosstalk correction prior to bias frame creation to ensure that the crosstalk
-signal from hot columns is corrected or else these will get imprinted on all of
-the amplifier segments which is undesirable.
+After correcting for the effects described above, there may be some residual
+imprint of some bias structure.  To generate a bias frame, which will be
+subsequently subtracted from the image we take a series of zero-second
+integration frames, perform the above ISR correction described above on each
+frame independently, and then take the median per pixel.  This is what we call
+a ``combined bias frame''. Note that it is important to perform crosstalk
+correction prior to bias frame creation to ensure that the crosstalk signal
+from hot columns is corrected or else these will get imprinted on all of the
+amplifier segments which is undesirable.
 
 \subsection{Gain Normalization}
 
-In this step we convert the units of each amplifier from ADU to $\etron$ using
+Up to this point in the processing chain, all operations are performed with ADU
+units. In this step we convert the units of each amplifier from ADU to $\etron$ using
 the gain measurement.  This is a two step process.  In the first step, we
-correct the image to account for the fact that the gain hasa small dependence
+correct the image to account for the fact that the gain has a small dependence
 on readout board (REB) temperature ($\approx 0.06\%/{^\circ}C$), and we must
 correct for any small temperature shifts to ensure all of our images can use
-equivalent calibrations.  In the second step, we use the gains ($\etron /
-\mathrm{ADU}$) to convert each amplifier from ADU units to $\etron$ units.
+equivalent calibrations.  In the second step, we use the gains measured from
+the photon transfer curve calibration frames ($\etron / \mathrm{ADU}$) to
+convert each amplifier from ADU units to $\etron$ units.
 
 The gain dependence on temperature was estimated via [a method to be TBD] using
 a dataset [TBD].
@@ -303,6 +307,32 @@ a dataset [TBD].
 After correcting for the temperature shifts, we use the photon transfer curve
 (PTC) analysis to measure the gain from each amplifier (ref).  The PTC analysis was
 done with XX flat pairs.  Details to be described.
+
+\subsection{Crosstalk Correction}
+\label{sec:xtalk}
+
+There may be multiple sources of crosstalk, where the signal from one amplifier
+segment affects the readout from another amplifier segment on the same
+detector. The camera team (A. Snyder, thesis) has determined that the primary
+location of crosstalk is in the ribbon cabling coming directly out of the
+detectors [need Adam Snyder et al. to confirm the description here; we probably
+  also want to add an image of the electronics in question]. This part of the
+signal chain is prior to the correlated-double-sampling and digitization, and
+therefore the natural units are $\etron$, and this correction should be made
+after the gain normalization.
+
+The crosstalk signal is corrected with a full matrix for each detector that
+describes the effect of each ``source'' amplifier on every ``target''
+amplifier. Amplifiers on the same side of the detector that share a read-out
+board (REB) have larger crosstalk signal than those that are on different
+REBs. In addition to the standard linear crosstalk signal, there is a
+non-linearity in the crosstalk response of the LSSTCam amplifiers.  These are
+modeled as a first-order correction to the crosstalk matrix as a function of
+source signal level (A. Snyder, thesis).
+
+In the future we may be able to decompose different crosstalk signals in
+different parts of the signal chain, and would update the sequence of ISR steps
+accordingly.
 
 \subsection{CTI Correction}
 \label{sec:cti}
@@ -313,7 +343,8 @@ transfer inefficiency (CTI).  As charge is clocked along the serial registers,
 there is a small amount of charge that may be left behind.  In the LSSTCam
 detectors this is due to charge traps as described in a model from Snyder et
 al.  (ref).  The details of the CTI correction algorithm and method of building
-the CTI correction coefficients is in [ref].
+the CTI correction coefficients is in Snyder and Roodman (2020) (for ITL) and
+?? for E2V.
 
 \subsection{Variance Plane Creation}
 
@@ -329,12 +360,13 @@ The defects are determined following the methodology from the camera team
 (ref?).  We have two types of defects, ``hot'' defects which are determined
 from looking at high outlier pixels in the combined dark frames, and ``cold''
 defects which are determined from looking at low outlier pixels in the combined
-flat field frames.  Additionally, we mask all pixels in a 7 (?) pixel border
+flat field frames.  Additionally, we mask all pixels in a 5 (TBD) pixel border
 around each detector which have very strong lateral electric field distortions
 at this stage.
 
 After masking, these pixels are interpolated for visual fidelity using an
-interpolation algorithm that I actually don't know what it is.
+interpolation algorithm that is about to be updated this week and we will need
+a reference/description of that.
 
 \subsection{Dark Subtraction}
 
@@ -351,15 +383,15 @@ accumulates in a pixel it will distort the local electric field and push later
 arriving photocharges away, with the net result that brighter objects have a
 slightly broader point spread function (PSF).  The BFE kernel is derived from
 flat field pairs, as this effect will create pixel-to-pixel correlations in the
-flats.  See Broughton et al. for details on our algorithm for estimating the BF
+flats.  See Broughton et al. (2023) for details on our algorithm for estimating the BF
 kernel as well as correcting it in the pixel images.
 
 \subsection{Applying Flat Fields}
 
 After the above series of steps, we have an unflattened, gain normalized image
-with sensor effects removed.  See below for some details on flat fielding.  I'm
-not sure how much detail to put here, since the detailed flat discussion is
-part of the photometric calibration.
+with sensor effects removed.  As flat fielding is intrinsically connected to
+photometric calibration, we defer the discussion of how flat fields are used to
+Sections~\ref{sec:photom:reffluxflat} and \ref{sec:photom:backgrounds}.
 
 \section{Photometry with Chromatic Corrections}
 \label{sec:photocal}
@@ -484,7 +516,10 @@ observed passbands tends toward the mean (standard) passband.  For LSSTCam this
 is made more challenging by the different shapes of the QE curves of the two
 types of detectors (E2V and ITL), and so we must decide whether to choose one
 or the other shape as the standard, or to ``split the baby'' and choose
-something in the middle that is representative of neither.
+something in the middle that is representative of neither. We will explore the
+options during commissioning, as the optimal decision depends on the as-built
+performance of the spatial varying throughput due to vignetting and filter
+variations.
 
 \subsection{Observed Passbands}
 
@@ -550,6 +585,7 @@ position.  Note that we could use monochromatic flats like the DECal system
 ghosting due to unfocused light makes this much easier with the CBP.
 
 \subsubsection{Reference Flux Flats}
+\label{sec:photom:reffluxflat}
 
 The term $S^{\mathrm{refflux}}$ is the reference flux flat which normalizes the
 response to focused light~(see, e.g. B17).  Nominally, this has chromatic
@@ -573,7 +609,7 @@ Nevertheless, we still start with dome flats as they are the most efficient way
 of measuring the relative response of all the billions of pixels in LSSTCam on
 small scales.
 
-The dome flat is a good start for estimating the reference flax flat, but has
+The dome flat is a good start for estimating the reference flux flat, but has
 issues at small scales and large scales.  At small scales, there are lateral
 electric field effects such as ``tree rings'' and the ``picture frame'' that
 are pixel size variations that show up as apparent QE variations in the dome
@@ -598,7 +634,8 @@ synthetic stars from the CBP are dithered around the full focal plane.  The
 advantage of this is that the response can be more carefully controlled, and it
 can be performed in narrow wavelength steps to build up the dynamic CBP star
 flat with any arbitrary spectrum.  The software to perform this analysis will
-not be ready by the completion of construction.
+not be ready by the completion of construction and will be developed in the
+early years of the LSST.
 
 \subsection{Atmosphere Response}
 
@@ -623,7 +660,7 @@ where $S^{\mathrm{molecular}}$ is the absorption and scattering from dry gasses
 water vapor (primarily in the z and y bands); $\tau$ is the aerosol optical
 depth (AOD); $X$ is the airmass; and $\mathrm{bp}$ is the barometric pressure.
 
-Following FGCM, we obtain the molecular scattering using MODTRAN (ref) combined
+Following FGCM, we obtain the molecular scattering using MODTRAN (Berk et al. refs) combined
 with the barometric pressure, which is obtained as part of the standard suite
 of weather data at Cerro Pachon.  Ozone absorption can be parameterized by one
 parameter per night.  All constituent throughputs are computed as a function of
@@ -670,10 +707,11 @@ than the mountain peak where the telescope is sited.
 \subsection{Integrating Over Sources}
 
 This short section will discuss PSF modeling and aperture photometry and the
-finit size of stars (and galaxies) and the care that needs to be taken with
+finite size of stars (and galaxies) and the care that needs to be taken with
 fluence or surface density images, following B17.
 
 \subsection{Foregrounds and Backgrounds}
+\label{sec:photom:backgrounds}
 
 What to do about foregrounds and backgrounds, including fringes?  These needs
 to be written.
@@ -687,17 +725,38 @@ to be written.
 
 Flatfield system consists of four main parts: a calibration screen, an aspheric reflector optic, a tunable laser and a white light system. 
 
-The calibration screen will be illuminated by either the white light system or a tunable laser. The white light system will be used for daily flats, while the tunable laser will be used to create monochromatic flats. Both illumination systems are mounted on the dome and co-rotate with the calibration screen. The output of each is co-located at the center of the calibration screen and can be switched between. In order to project that light onto the screen, and additional optic is mounted on the back of the camera and pancake wrap. This is located precisely 3 meters from the projector. It is critical that the projector is aligned with the reflector to ensure a flat illumination pattern on the calibration screen. 
+The calibration screen will be illuminated by either the white light system or
+a tunable laser. The white light system will be used for daily flats, while the
+tunable laser will be used to create monochromatic flats. Both illumination
+systems are mounted on the dome and co-rotate with the calibration screen. The
+output of each is co-located at the center of the calibration screen and can be
+switched between. In order to project that light onto the screen, an additional
+optic is mounted on the back of the camera and pancake wrap. This is located
+precisely 3 meters from the projector. It is critical that the projector is
+aligned with the reflector to ensure a flat illumination pattern on the
+calibration screen.
 
 \subsection{Calibration Screen}
 The calibration screen is a large reflective surface that can be aligned with the primary mirror and send diffuse light directly to the telescope and camera. It is large enough to illuminate the whole telescope at one time. The surface itself has a diameter of 10.27 meters and an inner diameter of 3.18 meters. Of this area, the section from a diameter of 4.18 - 9.27 meters is coated with a highly reflective material. The outer and inner rings are coated with a very absorptive material. The screen is built of several small panels, with 16 panels making the outer ring and 8 panels making the inner ring. They are secured to a structure such that they are all flat to 3mm across the whole surface. The panels are coated with Labsphere Permaflect 94\% and 5\% respectively. 
 
-The structure on which the panels are mounted can rotate from 0 to -23 degrees relative to horizontal using an actuator. In this way, it can be tilted so that the optical axis of the telescope aligns with teh optical axis of the screen. There will also be 4 retroreflectors mounted around the screen that can be seen by a laser tracker that is mounted on the telescope so that the screen can be easily aligned with the telescope on a daily basis. 
+The structure on which the panels are mounted can rotate from 0 to -23 degrees
+relative to horizontal using an actuator. In this way, it can be tilted so that
+the optical axis of the telescope aligns with the optical axis of the
+screen. There will also be 4 retroreflectors mounted around the screen that can
+be seen by a laser tracker that is mounted on the telescope so that the screen
+can be easily aligned with the telescope on a daily basis.
+
 
 Requirements for the screen can be found in LTS-523 and drawings can be found in LTS-126.
 
 \subsection{Reflector}
-The optic that is used to illuminate the calibration screen in full take the shape of an asphere, which is a radially symmetric optic with a radius of curvature that varies radially. The Rubin Observatory aspheric reflector optic was made from a single piece of aluminum, which was necessary given it's unique shape. The shape of the asphere is given by the following function:
+
+The optic that is used to illuminate the calibration screen in full takes the
+shape of an asphere, which is a radially symmetric optic with a radius of
+curvature that varies radially. The Rubin Observatory aspheric reflector optic
+was made from a single piece of aluminum, which was necessary given it's unique
+shape. The shape of the asphere is given by the following function:
+%
 \begin{equation}
 Z(s) = \frac{C s^{2}}{1+\sqrt{1-(1+k)\,C^{2}s^{2}}} + A_{4}s^{4} + A_{6}s^{6} + ...
 \end{equation}
@@ -761,7 +820,7 @@ The spectral response of the injected light will be measured by a pair of fiber-
 The data from the spectrographs will be saved in a fits file in the lfa that will include the wavelength array and the counts measured by the spectrograph at that spacing.
 
 \section{CBP}
-The Rubin CBP was built by DFM Engineering. 
+The Rubin CBP was built by DFM Engineering~\footnote{https://www.dfmengineering.com}.
 The design is essentially a Schmidt camera used in reverse. 
 It includes a primary mirror of 33cm diameter, Schmidt Corrector and a 3-element Flat Field Corrector. 
 It produces a beam with an aperture of 24.1 cm and a field of view of 4.1 degrees. 
@@ -782,7 +841,8 @@ The focal length of the CBP is 625mm, and with the LSST focal length at 10.1m, t
     \label{tab:my_label}
 \end{table}
 
-The mount of the CBP allows movement in Azimuth and Elevation, with a swing diameter of 51.8". 
+The mount of the CBP allows movement in Azimuth and Elevation, with a swing
+diameter of 1.32 meters.
 The locations are controlled by a Galil Digital Motor Controller (DMC) that is mounted on the azimuth housing. It controls the motors, reads the encoders, and interfaces to the control computer over ethernet. 
 Additionally, the DMC controls the focus of the primary mirror and changes and rotates the masks. 
 The azimuth and elevation stages are absolutely encoded with a Renishaw 26-bit on axis encoder. 
@@ -801,7 +861,7 @@ The current Integrating Sphere installed on the CBP is a Labsphere 3P-GPS-060-SF
 This integrating sphere has an interior diameter of 6 in. (152.4mm) and an exit port of 2.5 in. (63.5 mm), coated with spectraflect coating. 
 In the exit port a photodiode will be mounted and it will be illuminated by an optical fiber.
 The integrating sphere is held to the mask stage with standoffs. 
-It sits $\sim 3$ in. from the focal plane/mask. 
+It sits $\sim 7.5~\mathrm{cm}$ from the focal plane/mask. 
 Using \url{https://www.labsphere.com/wp-content/uploads/2021/09/Integrating-Sphere-Theory-and-Applications.pdf} as a guide to calculate the intensity of light exiting the integrating sphere by multiplying Ls by the flux incident on the integrating sphere.
 
 \section{AuxTel/LATISS}
