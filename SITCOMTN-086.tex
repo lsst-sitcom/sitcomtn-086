@@ -58,6 +58,8 @@ Parker Fagrelius, Eli Rykoff
 
 \setcounter{tocdepth}{2}
 
+\graphicspath{{./}{figures/}}
+
 \begin{document}
 
 % Create the title page.
@@ -213,6 +215,18 @@ produced in each pixel incident on the camera.  In this stage we do not correct
 for quantum efficiency as a function of wavelength, as that requires knowledge
 of each individual source SED.  We leave the wavelength dependent effects to
 the photometric calibration described in Section~\ref{sec:photocal}.
+
+The detector model is in Figure~\ref{fig:detector_model}.
+
+
+\begin{figure}[htb]
+\centering
+\includegraphics[width=0.98\linewidth]{calibration_boxes_detector_model}
+\caption{Model of the LSSTCam detectors and readout electronics.}
+\label{fig:detector_model}
+\vspace{0.1cm}
+\end{figure}
+
 
 % If necessary we can add in a section about differential non-linearity corrections.
 
