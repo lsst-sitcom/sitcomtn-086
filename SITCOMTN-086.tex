@@ -206,18 +206,30 @@ In this section, we describe the instrument signature removal (ISR) for
 LSSTCam.  After the photons hit the detector surface, there are a number of
 sensor effects that alter the image as photoelectrons are produced, collected
 in the detector, clocked and read out, and sent through the amplifier(s) to the
-analog-to-digital converter (ADC).  Each of these steps can imprint an effect,
-including adding noise, non-linearities, cross-talk, etc.  Our goal in ISR is
-to apply corrections ``in reverse'' to go from the raw camera output of Analog
-to Digital Units (ADU) in 16 amplifiers to a ``post ISR'' image in units of
-electrons ($\etron$) that are equivalent to the number of photocarriers
-produced in each pixel incident on the camera.  In this stage we do not correct
+analog-to-digital converter (ADC).
+
+In the first part of this section, we introduce a simplified model of the
+LSSTCam detector and readout system that we believe captures the fundamental
+effects.  Then we describe how we apply corrections ``in reverse'' to go from
+the raw camera output of Analog to Digital Units (ADU) in 16 amplifiers to a
+``post ISR'' image in units of electrons ($\etron$) that are equivalent to the
+number of photocarriers produced in each pixel in the camera. In this stage we do not correct
 for quantum efficiency as a function of wavelength, as that requires knowledge
 of each individual source SED.  We leave the wavelength dependent effects to
 the photometric calibration described in Section~\ref{sec:photocal}.
 
-The detector model is in Figure~\ref{fig:detector_model}.
+\subsection{LSSTCam Detector and Electronics Model}
 
+The LSSTCam detectors are 4k x 4k CCDs comprised of 16 amplifier segments of approximately
+500 columns (the serial transfer direction) and 2000 rows (the parallel
+transfer direction).  The amplifier segments are laid out in 2 rows of 8
+amplifiers, with the ``top half'' amplifiers denoted ``C10'' through ``C17''
+and the bottom half denoted ``C00'' through ``C07''.  The amplifiers are
+connected via cabling to a Readout Board (REB) which has two sets of Analog Signal
+Processing Integrated Circuit (ASPIC) chips.  [Need to confirm how many ASPICs
+  per board and how many boards per raft, etc.]  An illustration of our
+function model of the amplifier segments and readout electronics is in
+Figure~\ref{fig:detector_model}.
 
 \begin{figure}[htb]
 \centering
@@ -226,6 +238,69 @@ The detector model is in Figure~\ref{fig:detector_model}.
 \label{fig:detector_model}
 \vspace{0.1cm}
 \end{figure}
+
+The functional model is intended to be read from left to right and top to
+bottom.  We start with an amplifier segment that has incident photons.  First,
+as these photons are collected, we have the Brighter/Fatter Effect (BFE). This
+is the result of the fact that as charge accumulates in a pixel it will distort
+the local electric field and push later arriving photocharges away, with the
+net result that bright objects have a slightly broader point spread function
+(PSF).  See Section~\ref{sec:bfecorr} for more information on the correction to
+this effect.
+
+Next, we note that as the exposure is integrating charge, there is some small
+amount of dark current that accumulates.  For LSSTCam sensors this dark current
+is very small (XX electrons per second) except for warm and hot pixels.  See
+Section~\ref{sec:darkcorr} for more information on the dark correction.
+
+The charge is then read out by careful timing of voltages in the sequencer
+file.  Charge is moved down into the serial register, and then out to the
+on-chip amplifier which has an ``on chip gain'' of approximately $\sim5 \micro
+V/e^-$.  After each row is read out the charges is transferred in the parallel
+direction.  The full readout of each amplifier takes around [2.2 seconds].
+
+As charge is clocked out along the serial direction, there is a small amount of
+charge that is left behind.  This is the ``global charge-transfer ineffeciency
+(CTI)'' that is corrected by a model from Snyder and Roodman (2020).
+Furthermore, as charge is clocked out of the amplifier segment into the on-chip
+amplifier there is a sharp turn in the wiring.  This creates a small trap that
+can fill up and decay with a characteristic timescale.  This CTI trap is also
+corrected by the Snyder and Roodman model.  See Section~\ref{sec:cticorr} for
+more information on the CTI correction.
+
+At the same time, some amount of charge is injected into the signal chain at
+this location by the clock.  This clock-injected offset (or serial feedthrough)
+has a level equivalent of -10000 to 10000 ADU, depending on the amplifier.  We
+note that although this bias offset is injected early in the signal chain it is
+virtually indistinguishable from the explicit bias injection prior to
+digitization.  Therefore, it is subtracted out with the overscan subtraction
+(see Section~\ref{sec:}).  We also assume that this is the location in the
+signal chain where additional 2D bias structure including the bias ``wave''
+(bias structure along the serial direction) is coming from.
+
+The on-chip amplifier is the origin of the high-signal non-linearity (over
+50000 ADU).  In addition to the high-signal non-linearity, there is also some
+non-linearity in the mid-signal regime that comes from the ASPIC pre-amp
+(described below), as well as some low-signal non-linearity of unknown origin.
+In correction (see Section~\ref{sec:linearitycorr}) we do not distinguish
+between the sources of non-linearity, and assume for the sake of simplicity
+that it all originates in the on-chip amplifier.  Before correction the typical
+non-linearity is of order XX \%, and after correction it is below 0.1\% for the
+vast majority of amplifiers.
+
+The signal now travels down a set of cables from all the amplifiers into the
+Readout Board and ASPIC.  It is in this cabling that the crosstalk signal
+between neighboring amplifiers (which are in neighboring cables) appears.  This
+crosstalk has some small non-linearity, as studied by Snyder (Thesis).  There
+is additional crosstalk between amplifiers across the midline that is typically
+of the opposite sign, and comes from ASPIC-to-ASPIC interactions.  We do not
+distinguish between these sources of crosstalk and correct them together as
+described in Section~\ref{sec:xtalkcorr}.
+
+When entering the ASPIC the signal is first amplified by the ASPIC pre-amp,
+which has an adjustable gain that was set so that the total gain is
+approximately 1.7 ADU/electron.
+
 
 The ISR reduction flowchart  is in Figure~\ref{fig:isr_model}.
 
@@ -240,6 +315,7 @@ The ISR reduction flowchart  is in Figure~\ref{fig:isr_model}.
 % If necessary we can add in a section about differential non-linearity corrections.
 
 \subsection{Overscan Correction}
+\label{sec:overscancorr}
 
 The first operation we must perform is ``overscan correction'' to remove the
 amplifier bias level.  Unfortunately, for many channels the bias level in
@@ -262,7 +338,7 @@ columns and saturated stars bleed into the parallel overscan region, making
 these columns unusable for parallel overscan subtraction.  In addition, these
 bright signals inject a crosstalk signal into the other crosstalk regions.
 Therefore, prior to parallel overscan subtraction we perform crosstalk
-correction on just the parallel overscan region (see Section~\ref{sec:xtalk}
+correction on just the parallel overscan region (see Section~\ref{sec:xtalkcorr}
 for details on the crosstalk correction algorithm).  Additionally, we mask the
 regions with saturated parallel overscan and interpolate along the columns.
 Finally, we perform column-by-column parallel overscan correction.
@@ -275,7 +351,7 @@ steps.  We have yet to determine which definition of saturation/full-well is
 appropriate.  Possible definitions include (a) the photon transfer curve (PTC)
 turnoff (where the variance of pixel estimates deviates significantly from
 Poisson); (b) the level at which the charge-transfer-inefficiency (see
-Sec~\ref{sec:cti}) cannot be corrected; (c) the maximum possible observed value
+Sec~\ref{sec:cticorr}) cannot be corrected; (c) the maximum possible observed value
 in a pixel; (d) the level above which the E2V sensors exhibit persistence
 effects. Most likely we will need multiple definitions of ``saturation'', with
 pixels treated and flagged separately. For example, the different saturation
@@ -285,6 +361,7 @@ there will be charge bleeds that need to be interpolated; (d) we need to
 correct subsequent images based on the pixels that are above this threshold.
 
 \subsection{Linearity Correction}
+\label{sec:linearitycorr}
 
 The response of the readout system is not completely linear, as the
 amplification of the voltage in the sense node of the amplifier may not be
@@ -332,7 +409,7 @@ After correcting for the temperature shifts, we use the photon transfer curve
 done with XX flat pairs.  Details to be described.
 
 \subsection{Crosstalk Correction}
-\label{sec:xtalk}
+\label{sec:xtalkcorr}
 
 There may be multiple sources of crosstalk, where the signal from one amplifier
 segment affects the readout from another amplifier segment on the same
@@ -358,16 +435,14 @@ different parts of the signal chain, and would update the sequence of ISR steps
 accordingly.
 
 \subsection{CTI Correction}
-\label{sec:cti}
+\label{sec:cticorr}
 
 Now that we have corrected for all the amplifier effects, we can now correct
 for effects that are in the detector itself.  The first of these is charge
-transfer inefficiency (CTI).  As charge is clocked along the serial registers,
-there is a small amount of charge that may be left behind.  In the LSSTCam
-detectors this is due to charge traps as described in a model from Snyder et
-al.  (ref).  The details of the CTI correction algorithm and method of building
-the CTI correction coefficients is in Snyder and Roodman (2020) (for ITL) and
-?? for E2V.
+transfer inefficiency (CTI).  The CTI model of Snyder and Roodman (2020) is
+calibrated with the ``extended pixel edge response'' (EPER) measurement that
+shows how much imaging charge from flat-field images leaks into the serial
+overscan region.
 
 \subsection{Variance Plane Creation}
 
@@ -392,22 +467,22 @@ interpolation algorithm that is about to be updated this week and we will need
 a reference/description of that.
 
 \subsection{Dark Subtraction}
+\label{sec:darkcorr}
 
-As the exposure is integrating charge, there is some small amount of dark
-current that accumulates.  We determine the dark current by taking a series of
-30 second images (to match the survey integration time) and taking a median
-combination.  The typical dark current is small (XX electrons per second) but
-may be larger for some amplifiers.
+We determine the dark current by taking a series of 30 second images (to match
+the survey integration time) and taking a clipped mean combination after
+rejecting obvious cosmic rays in the dark images.  The typical dark current is
+small (XX electrons per second) but may be larger for some amplifiers.
 
 \subsection{Brighter-Fatter Correction}
+\label{sec:bfecorr}
 
-The Brighter/Fatter effect (BFE) is the result of the fact that as charge
-accumulates in a pixel it will distort the local electric field and push later
-arriving photocharges away, with the net result that brighter objects have a
-slightly broader point spread function (PSF).  The BFE kernel is derived from
-flat field pairs, as this effect will create pixel-to-pixel correlations in the
-flats.  See Broughton et al. (2023) for details on our algorithm for estimating the BF
-kernel as well as correcting it in the pixel images.
+Finally, we correct for the Brighter/Fatter effect.  To derive the BFE kernel
+to correct this effect we make use of the fact that the BFE creates
+pixel-to-pixel correlations in flat-field images.  The BFE kernel itself is
+derived from the same flat-field pairs that are used to derive the PTC gain.
+See Broughton et al. (2003) [ref] for details on our algorithm for estimating
+the BFE kernel as well as correcting it in the pixel images.
 
 \subsection{Applying Flat Fields}
 
