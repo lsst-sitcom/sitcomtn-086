@@ -298,11 +298,36 @@ distinguish between these sources of crosstalk and correct them together as
 described in Section~\ref{sec:xtalkcorr}.
 
 When entering the ASPIC the signal is first amplified by the ASPIC pre-amp,
-which has an adjustable gain that was set so that the total gain is
-approximately 1.7 ADU/electron.
+which has an adjustable gain ($g_2$) that was set so that the total gain is
+approximately 1.7 ADU/electron. This pre-amp has a small amount of
+non-linearity, and we attribute the ``mid-signal'' non-linearity to this
+amplifier. In addition, the gain of this amplifier depends slightly on the
+temperature of the REB, with a constant of approximately $0.06\%/C$. Under
+normal operating conditions the REB temperatures are kept stable so the impact
+of this variation is negligible.
+
+The signal then is measured with a dual-slope integrator.  [Need somebody to
+  write a couple of sentences here].  This has another effective gain ($g_3$)
+that depends on the readout time and hence the time duration of the integration
+per pixel.  This gain may also be temperature dependent, but that is completely
+degenerate with the pre-amp temperature dependence.
+
+Next we inject some level of bias signal to ensure that all voltages are
+positive.  The amount of bias injection varies from amp to amp, but must be at
+least 10000~ADU (equivalent) to ensure that we are above zero from any negative
+clock-injected offset.
+
+Finally, the signal is put into an analog-to-digital converter (ADC) which
+provides the final digitized signal with a total effective gain
+$g~\etron/\mathrm{ADU}$.  The ADC itself does not have perfect mapping from
+continuous voltage into digitized counts, with some ``codes'' preferred over
+others.  At the moment we do not correct for this differential non-linearity
+(DNL) in the ADC.  However, we plan to in the future.
 
 
-The ISR reduction flowchart  is in Figure~\ref{fig:isr_model}.
+\subsection{ISR Ordering}
+
+The ISR reduction flowchart is in Figure~\ref{fig:isr_model}.
 
 \begin{figure}[htb]
 \centering
