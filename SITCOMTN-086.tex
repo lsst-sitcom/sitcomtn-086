@@ -357,51 +357,109 @@ correction, and gain correction.  In the future we would like to offset the
 digitization with a full DNL look-up table that can map each ADU to a range of
 input voltages.
 
-\subsection{Overscan Correction}
+\subsection{Serial Overscan Correction}
 \label{sec:overscancorr}
 
-The first operation we must perform is ``overscan correction'' to remove the
-amplifier bias level.  Unfortunately, for many channels the bias level in
-LSSTCam is not completely stable with time, and thus we support a somewhat
-complicated overscan subtraction routine, using both serial overscan (the
-additional readout at the end of each row) and parallel overscan (the
-additional readout at the end of each column).  The software may be configured
-to use specialized overscan settings on a per-detector and per-amplifier basis.
-
-In our default mode, we first perform row-by-row serial overscan correction to
-remove the bias level as well as possible bias drift and jumps.  We have X
-overscan pixels per row, and we take the median of each row, skipping the first
-two columns, using the LSST Science Pipelines integer median sampling algorithm
-(ref?).  This introduces approximately XX ADU of noise, which may or may not be
-comparable to our read noise (TBD).
-
-For some amplifier channels we need to additionally perform parallel overscan
-subtraction.  One challenge of the parallel overscan subtraction is that hot
-columns and saturated stars bleed into the parallel overscan region, making
-these columns unusable for parallel overscan subtraction.  In addition, these
-bright signals inject a crosstalk signal into the other crosstalk regions.
-Therefore, prior to parallel overscan subtraction we perform crosstalk
-correction on just the parallel overscan region (see Section~\ref{sec:xtalkcorr}
-for details on the crosstalk correction algorithm).  Additionally, we mask the
-regions with saturated parallel overscan and interpolate along the columns.
-Finally, we perform column-by-column parallel overscan correction.
+We now run serial overscan correction to remove the overall bias level in each
+amplifier. Due to the fact that many channels in LSSTCam are not completely
+stable with time, our default mode is to perform row-by-row serial overscan
+correction to remove this bias level as well as possible bias drifts and
+jumps. We have 64 overscan pixels per row, and we have 64 overscan pixels per
+row.  We take the median of each row, skipping the first 3 and final 3 columns
+to avoid pixels with residual charge-transfer-inefficiency (CTI) which bleeds
+into the serial overscan region.
 
 \subsection{Saturation Flagging}
 
-After overscan correction, we must flag pixels that are deemed to be
-``saturated'' to ensure that these are handled correctly in the following ISR
-steps.  We have yet to determine which definition of saturation/full-well is
-appropriate.  Possible definitions include (a) the photon transfer curve (PTC)
-turnoff (where the variance of pixel estimates deviates significantly from
-Poisson); (b) the level at which the charge-transfer-inefficiency (see
-Sec~\ref{sec:cticorr}) cannot be corrected; (c) the maximum possible observed value
-in a pixel; (d) the level above which the E2V sensors exhibit persistence
-effects. Most likely we will need multiple definitions of ``saturation'', with
-pixels treated and flagged separately. For example, the different saturation
-definitions above have the following effects: (a) the error estimate may be
-biased; (b) PSF fluxes will be biased but aperture fluxes will be fine; (c)
-there will be charge bleeds that need to be interpolated; (d) we need to
-correct subsequent images based on the pixels that are above this threshold.
+After serial overscan correcton, we flag pixels that are deemed to be
+``saturated'' to ensure that these pixels are masked and interpolated correctly
+in the following ISR steps.  There are many possible definitions of saturation,
+and we have decided to use the photon transfer curve (PTC) turnoff as our
+initial saturation estimate.  This is the level at which the variance of a
+pixel deviates significantly from Poisson, and appears to be a good
+approximation of when blooming/bleeding starts to occur for point sources.
+
+During ComCam commissioning, we noticed some additional behavior in the ITL
+detectors regarding saturation that requires special handling.  First of all,
+when a bright star has a saturated bleed trail that hits the edge of the
+detector it both spreads out with a characteristic trumpet-shaped ``edge
+bleed'' pattern, and also ``sags'' such that the level of the charge bleed is
+both well above the sky level but also well below the nominal saturation level.
+Therefore we have specialized code to identify these edge bleeds and mask them.
+Second of all, in cases where a not-quite-as-bright star has a bleed trail that
+comes close to but not at the edge the obviously saturated trail can in some
+cases drop down below the saturation level. In these cases we detect these
+columns and mark the full column as saturated for downstream processing.
+
+\subsection{Gain Normalization}
+\label{sec:gainnorm}
+
+Up to this point in the processing chain, all operations are performed with ADU
+units. In this step we convert the units of each amplifier from ADU to $\etron$ using
+the gain measurement from the PTC analysis [ref].  All downstream calibrations
+are either produced in $\etron$ units, or are adjusted using the gain values to
+ensure consistent application of crosstalk, linearity, CTI, etc.
+
+In the future, we may apply corrections to the gain based on REB temperature
+(as mentioned above), or other factors that we find that have a predictable
+impact on the gain. At the moment we have not found this to be necessary during
+ComCam processing despite the fact that the REBs were not temperature
+controlled as is the case with LSSTCam.
+
+\subsection{Crosstalk Correction}
+\label{sec:xtalkcorr}
+
+There may be multiple sources of crosstalk, where the signal from one amplifier
+segment affects the readout from another amplifier segment on the same
+detector. The camera team (A. Snyder, thesis) has determined that the primary
+location of crosstalk is in the ribbon cabling coming directly out of the
+detectors [need Adam Snyder et al. to confirm the description here; we probably
+also want to add an image of the electronics in question].  As discussed above,
+this part of the signal chain is prior to the input to the ASPIC and therefore
+the natural units are $\etron$.
+
+The crosstalk signal is corrected with a full matrix for each detector that
+describes the effect of each ``source'' amplifier on every ``target''
+amplifier. Amplifiers on the same side of the detector that share a REB have
+larger crosstalk signal than those that are on different REBs. In addition to
+the standard linear crosstalk signal, there is a non-linearity in the crosstalk
+response of the LSSTCam amplifiers.  These are modeled as a first-order
+correction to the crosstalk matrix as a function of source signal level
+(A. Snyder, thesis).
+
+In the future we may be able to decompose different crosstalk signals in
+different parts of the signal chain, and would update the sequence of ISR steps
+accordingly.
+
+[Need a paragraph on subtrahend masking]
+
+\subsection{Parallel Overscan Correction}
+
+For many amplifier channels we need to additionally perform parallel overscan
+subtraction due to additional unstable structure in the bias.  One particular
+challenge of the parallel overscan subtraction is that hot columns and
+saturated stars bleed into the parallel overscan region, making these columns
+unusable for overscan subtraction. In addition, these bright signals may inject
+a crosstalk signal into the other crosstalk regions.  That is why we perform
+parallel overscan subtraction after the crosstalk correction.
+
+We take considerable care in masking parallel overscan pixels that may be
+contaminated by bleed trails and significant residual crosstalk, while ensuring
+that structured bias signal is properly removed.  One of the main assumptions
+is that bleeds are always positive deviations in the parallel overscan region,
+while significant negative deviations are primarily from bias structure.
+
+% For some amplifier channels we need to additionally perform parallel overscan
+% subtraction.  One challenge of the parallel overscan subtraction is that hot
+% columns and saturated stars bleed into the parallel overscan region, making
+% these columns unusable for parallel overscan subtraction.  In addition, these
+% bright signals inject a crosstalk signal into the other crosstalk regions.
+% Therefore, prior to parallel overscan subtraction we perform crosstalk
+% correction on just the parallel overscan region (see Section~\ref{sec:xtalkcorr}
+% for details on the crosstalk correction algorithm).  Additionally, we mask the
+% regions with saturated parallel overscan and interpolate along the columns.
+% Finally, we perform column-by-column parallel overscan correction.
+
 
 \subsection{Linearity Correction}
 \label{sec:linearitycorr}
@@ -431,51 +489,6 @@ a ``combined bias frame''. Note that it is important to perform crosstalk
 correction prior to bias frame creation to ensure that the crosstalk signal
 from hot columns is corrected or else these will get imprinted on all of the
 amplifier segments which is undesirable.
-
-\subsection{Gain Normalization}
-
-Up to this point in the processing chain, all operations are performed with ADU
-units. In this step we convert the units of each amplifier from ADU to $\etron$ using
-the gain measurement.  This is a two step process.  In the first step, we
-correct the image to account for the fact that the gain has a small dependence
-on readout board (REB) temperature ($\approx 0.06\%/{^\circ}C$), and we must
-correct for any small temperature shifts to ensure all of our images can use
-equivalent calibrations.  In the second step, we use the gains measured from
-the photon transfer curve calibration frames ($\etron / \mathrm{ADU}$) to
-convert each amplifier from ADU units to $\etron$ units.
-
-The gain dependence on temperature was estimated via [a method to be TBD] using
-a dataset [TBD].
-
-After correcting for the temperature shifts, we use the photon transfer curve
-(PTC) analysis to measure the gain from each amplifier (ref).  The PTC analysis was
-done with XX flat pairs.  Details to be described.
-
-\subsection{Crosstalk Correction}
-\label{sec:xtalkcorr}
-
-There may be multiple sources of crosstalk, where the signal from one amplifier
-segment affects the readout from another amplifier segment on the same
-detector. The camera team (A. Snyder, thesis) has determined that the primary
-location of crosstalk is in the ribbon cabling coming directly out of the
-detectors [need Adam Snyder et al. to confirm the description here; we probably
-  also want to add an image of the electronics in question]. This part of the
-signal chain is prior to the correlated-double-sampling and digitization, and
-therefore the natural units are $\etron$, and this correction should be made
-after the gain normalization.
-
-The crosstalk signal is corrected with a full matrix for each detector that
-describes the effect of each ``source'' amplifier on every ``target''
-amplifier. Amplifiers on the same side of the detector that share a read-out
-board (REB) have larger crosstalk signal than those that are on different
-REBs. In addition to the standard linear crosstalk signal, there is a
-non-linearity in the crosstalk response of the LSSTCam amplifiers.  These are
-modeled as a first-order correction to the crosstalk matrix as a function of
-source signal level (A. Snyder, thesis).
-
-In the future we may be able to decompose different crosstalk signals in
-different parts of the signal chain, and would update the sequence of ISR steps
-accordingly.
 
 \subsection{CTI Correction}
 \label{sec:cticorr}
