@@ -324,10 +324,15 @@ continuous voltage into digitized counts, with some ``codes'' preferred over
 others.  At the moment we do not correct for this differential non-linearity
 (DNL) in the ADC.  However, we plan to in the future.
 
-
 \subsection{ISR Ordering}
 
-The ISR reduction flowchart is in Figure~\ref{fig:isr_model}.
+The output of the camera is 16 different amplifier images, each with a data
+region and serial and parallel overscan pixels, all of which have units of
+digitized ADU.  The goal of instrumental signature removal is to reverse the
+ordering of the detector effects and obtain an image representing the
+photoelectron map as they originally hit the surface of the detector.  The
+flowchart outlining our ISR pipeline is in Figure~\ref{fig:isr_model}.  We now
+explain these steps and how they relate to the detector model described previously.
 
 \begin{figure}[htb]
 \centering
@@ -337,7 +342,20 @@ The ISR reduction flowchart is in Figure~\ref{fig:isr_model}.
 \vspace{0.1cm}
 \end{figure}
 
-% If necessary we can add in a section about differential non-linearity corrections.
+\subsection{Dithering Digitized Counts}
+
+The raw amplifier images are in units of digitized ADU. The ADU are only an
+approximation of the voltage input to the ADC due to the digitization. These
+digitized integer values can be difficult to work with, particularly when doing
+overscan subtraction, due to their discrete nature. Therefore, our first step
+is to offset the digitization by applying a ``dithering'' procedure where we
+add a uniform random value from $[-0.5,0.5)$ to each pixel (with a seed based
+on the unique exposure identification number). This dithering adds
+approximately $1/12\,\mathrm{ADU}$ of noise, and in exchange we see reduced
+row-to-row and column-to-column correlations after overscan, crosstalk
+correction, and gain correction.  In the future we would like to offset the
+digitization with a full DNL look-up table that can map each ADU to a range of
+input voltages.
 
 \subsection{Overscan Correction}
 \label{sec:overscancorr}
