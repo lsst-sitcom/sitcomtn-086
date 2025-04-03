@@ -219,6 +219,7 @@ of each individual source SED.  We leave the wavelength dependent effects to
 the photometric calibration described in Section~\ref{sec:photocal}.
 
 \subsection{LSSTCam Detector and Electronics Model}
+\label{sec:detmodel}
 
 The LSSTCam detectors are 4k x 4k CCDs comprised of 16 amplifier segments of approximately
 500 columns (the serial transfer direction) and 2000 rows (the parallel
@@ -245,7 +246,7 @@ as these photons are collected, we have the Brighter/Fatter Effect (BFE). This
 is the result of the fact that as charge accumulates in a pixel it will distort
 the local electric field and push later arriving photocharges away, with the
 net result that bright objects have a slightly broader point spread function
-(PSF).  See Section~\ref{sec:bfecorr} for more information on the correction to
+(PSF).  See Section~\ref{sec:bfcorr} for more information on the correction to
 this effect.
 
 Next, we note that as the exposure is integrating charge, there is some small
@@ -260,13 +261,13 @@ V/e^-$.  After each row is read out the charges is transferred in the parallel
 direction.  The full readout of each amplifier takes around [2.2 seconds].
 
 As charge is clocked out along the serial direction, there is a small amount of
-charge that is left behind.  This is the ``global charge-transfer ineffeciency
-(CTI)'' that is corrected by a model from Snyder and Roodman (2020).
+charge that is left behind.  This is the ``serial charge-transfer ineffeciency
+(sCTI)'' that is corrected by a model from Snyder and Roodman (2020).
 Furthermore, as charge is clocked out of the amplifier segment into the on-chip
 amplifier there is a sharp turn in the wiring.  This creates a small trap that
 can fill up and decay with a characteristic timescale.  This CTI trap is also
 corrected by the Snyder and Roodman model.  See Section~\ref{sec:cticorr} for
-more information on the CTI correction.
+more information on the sCTI correction.
 
 At the same time, some amount of charge is injected into the signal chain at
 this location by the clock.  This clock-injected offset (or serial feedthrough)
@@ -274,9 +275,10 @@ has a level equivalent of -10000 to 10000 ADU, depending on the amplifier.  We
 note that although this bias offset is injected early in the signal chain it is
 virtually indistinguishable from the explicit bias injection prior to
 digitization.  Therefore, it is subtracted out with the overscan subtraction
-(see Section~\ref{sec:}).  We also assume that this is the location in the
-signal chain where additional 2D bias structure including the bias ``wave''
-(bias structure along the serial direction) is coming from.
+(see Sections~\ref{sec:serialoverscancorr} and \ref{sec:paralleloverscancorr}).
+We also assume that this is the location in the signal chain where additional
+2D bias structure including the bias ``wave'' (bias structure along the serial
+direction) is coming from.
 
 The on-chip amplifier is the origin of the high-signal non-linearity (over
 50000 ADU).  In addition to the high-signal non-linearity, there is also some
@@ -288,12 +290,13 @@ that it all originates in the on-chip amplifier.  Before correction the typical
 non-linearity is of order XX \%, and after correction it is below 0.1\% for the
 vast majority of amplifiers.
 
-The signal now travels down a set of cables from all the amplifiers into the
-Readout Board and ASPIC.  It is in this cabling that the crosstalk signal
-between neighboring amplifiers (which are in neighboring cables) appears.  This
-crosstalk has some small non-linearity, as studied by Snyder (Thesis).  There
-is additional crosstalk between amplifiers across the midline that is typically
-of the opposite sign, and comes from ASPIC-to-ASPIC interactions.  We do not
+The signal now travels down a set of ribbon cables from all the amplifiers
+into the Readout Board and ASPIC.  It is in this cabling that the crosstalk
+signal between neighboring amplifiers (which are in neighboring cables)
+appears.  [get a picture of this part of the camera?] This crosstalk has some
+small non-linearity, as studied by Snyder (Thesis).  There is additional
+crosstalk between amplifiers across the midline that is typically of the
+opposite sign, and comes from ASPIC-to-ASPIC interactions.  We do not
 distinguish between these sources of crosstalk and correct them together as
 described in Section~\ref{sec:xtalkcorr}.
 
@@ -306,11 +309,11 @@ temperature of the REB, with a constant of approximately $0.06\%/C$. Under
 normal operating conditions the REB temperatures are kept stable so the impact
 of this variation is negligible.
 
-The signal then is measured with a dual-slope integrator.  [Need somebody to
-  write a couple of sentences here].  This has another effective gain ($g_3$)
-that depends on the readout time and hence the time duration of the integration
-per pixel.  This gain may also be temperature dependent, but that is completely
-degenerate with the pre-amp temperature dependence.
+The signal then is measured with a dual-slope integrator.  [Need somebody who
+  is not me to write a couple of sentences here].  This has another effective
+gain ($g_3$) that depends on the readout time and hence the time duration of
+the integration per pixel.  This gain may also be temperature dependent, but
+that is completely degenerate with the pre-amp temperature dependence.
 
 Next we inject some level of bias signal to ensure that all voltages are
 positive.  The amount of bias injection varies from amp to amp, but must be at
@@ -330,9 +333,14 @@ The output of the camera is 16 different amplifier images, each with a data
 region and serial and parallel overscan pixels, all of which have units of
 digitized ADU.  The goal of instrumental signature removal is to reverse the
 ordering of the detector effects and obtain an image representing the
-photoelectron map as they originally hit the surface of the detector.  The
-flowchart outlining our ISR pipeline is in Figure~\ref{fig:isr_model}.  We now
-explain these steps and how they relate to the detector model described previously.
+photoelectron map as they originally hit the surface of the detector. In some
+cases we cannot exactly reverse the order of the model.  For example, we treat
+all crosstalk coming from one location in the signal chain (the cabling between
+the detector and the REB), and we treat all non-linearity as coming from from
+the output amplifier on the detector.  In addition, we cannot separate the
+different locations of bias structure injected into the overscan.  The
+flowchart outlining our ISR pipeline is in Figure~\ref{fig:isr_model}.  In some
+cases we cannot exactly reverse the order of the model.
 
 \begin{figure}[htb]
 \centering
@@ -343,6 +351,7 @@ explain these steps and how they relate to the detector model described previous
 \end{figure}
 
 \subsection{Dithering Digitized Counts}
+\label{sec:dithering}
 
 The raw amplifier images are in units of digitized ADU. The ADU are only an
 approximation of the voltage input to the ADC due to the digitization. These
@@ -358,18 +367,20 @@ digitization with a full DNL look-up table that can map each ADU to a range of
 input voltages.
 
 \subsection{Serial Overscan Correction}
-\label{sec:overscancorr}
+\label{sec:serialoverscancorr}
 
 We now run serial overscan correction to remove the overall bias level in each
-amplifier. Due to the fact that many channels in LSSTCam are not completely
-stable with time, our default mode is to perform row-by-row serial overscan
-correction to remove this bias level as well as possible bias drifts and
-jumps. We have 64 overscan pixels per row, and we have 64 overscan pixels per
-row.  We take the median of each row, skipping the first 3 and final 3 columns
-to avoid pixels with residual charge-transfer-inefficiency (CTI) which bleeds
-into the serial overscan region.
+amplifier, including the injected bias signal. Due to the fact that many
+channels in LSSTCam are not completely stable with time, our default processing
+mode is to perform row-by-row serial overscan correction to remove this bias
+level as well as possible bias drifts and jumps. We have 64 overscan pixels per
+row, and we have 64 overscan pixels per row.  We take the median of each row,
+skipping the first 3 and final 3 columns to avoid pixels with residual
+charge-transfer-inefficiency (CTI) which bleeds into the serial overscan
+region.
 
 \subsection{Saturation Flagging}
+\label{sec:satflagging}
 
 After serial overscan correcton, we flag pixels that are deemed to be
 ``saturated'' to ensure that these pixels are masked and interpolated correctly
@@ -395,10 +406,14 @@ columns and mark the full column as saturated for downstream processing.
 \label{sec:gainnorm}
 
 Up to this point in the processing chain, all operations are performed with ADU
-units. In this step we convert the units of each amplifier from ADU to $\etron$ using
-the gain measurement from the PTC analysis [ref].  All downstream calibrations
-are either produced in $\etron$ units, or are adjusted using the gain values to
-ensure consistent application of crosstalk, linearity, CTI, etc.
+units. In this step we convert the units of each amplifier from ADU to $\etron$
+using the gain measurement from the PTC analysis [ref].  This location in the
+processing chain is necessarily approximate because there is another gain
+factor (the electronic on-chip gain) that is upstream, we apply the full gain
+factor here because the REB applies most of the gain when converting from
+voltages to ADU.  All downstream calibration products are either produced in
+$\etron$ units, or are adjusted using the gain values to ensure consistent
+application of crosstalk, linearity, CTI, etc.
 
 In the future, we may apply corrections to the gain based on REB temperature
 (as mentioned above), or other factors that we find that have a predictable
@@ -409,14 +424,10 @@ controlled as is the case with LSSTCam.
 \subsection{Crosstalk Correction}
 \label{sec:xtalkcorr}
 
-There may be multiple sources of crosstalk, where the signal from one amplifier
-segment affects the readout from another amplifier segment on the same
-detector. The camera team (A. Snyder, thesis) has determined that the primary
-location of crosstalk is in the ribbon cabling coming directly out of the
-detectors [need Adam Snyder et al. to confirm the description here; we probably
-also want to add an image of the electronics in question].  As discussed above,
-this part of the signal chain is prior to the input to the ASPIC and therefore
-the natural units are $\etron$.
+After correcting for the gain in the ASPIC, we correct the crosstalk signal which
+has its primary origin in the ribbon cabling between the REB and the detector.
+As discussed previously, this part of the signal chain in the model is prior to
+the input to the ASPIC and therefore the natural units are $\etron$.
 
 The crosstalk signal is corrected with a full matrix for each detector that
 describes the effect of each ``source'' amplifier on every ``target''
@@ -434,111 +445,141 @@ accordingly.
 [Need a paragraph on subtrahend masking]
 
 \subsection{Parallel Overscan Correction}
+\label{sec:paralleloverscancorr}
 
 For many amplifier channels we need to additionally perform parallel overscan
 subtraction due to additional unstable structure in the bias.  One particular
 challenge of the parallel overscan subtraction is that hot columns and
 saturated stars bleed into the parallel overscan region, making these columns
 unusable for overscan subtraction. In addition, these bright signals may inject
-a crosstalk signal into the other crosstalk regions.  That is why we perform
-parallel overscan subtraction after the crosstalk correction.
+a crosstalk signal into the other overscan regions.  That is why we perform
+parallel overscan subtraction after the crosstalk correction over the full
+frame, including overscan regions.
 
 We take considerable care in masking parallel overscan pixels that may be
 contaminated by bleed trails and significant residual crosstalk, while ensuring
-that structured bias signal is properly removed.  One of the main assumptions
-is that bleeds are always positive deviations in the parallel overscan region,
-while significant negative deviations are primarily from bias structure.
-
-% For some amplifier channels we need to additionally perform parallel overscan
-% subtraction.  One challenge of the parallel overscan subtraction is that hot
-% columns and saturated stars bleed into the parallel overscan region, making
-% these columns unusable for parallel overscan subtraction.  In addition, these
-% bright signals inject a crosstalk signal into the other crosstalk regions.
-% Therefore, prior to parallel overscan subtraction we perform crosstalk
-% correction on just the parallel overscan region (see Section~\ref{sec:xtalkcorr}
-% for details on the crosstalk correction algorithm).  Additionally, we mask the
-% regions with saturated parallel overscan and interpolate along the columns.
-% Finally, we perform column-by-column parallel overscan correction.
-
+that structured bias signal is properly removed.  One of the primary
+assumptions is that bleeds are always positive deviations in the parallel
+overscan region, while significant negative deviations are primarily from bias
+structure.  When a column is masked we do a simple interpolation from
+neighboring unmasked columns.
 
 \subsection{Linearity Correction}
 \label{sec:linearitycorr}
 
-The response of the readout system is not completely linear, as the
-amplification of the voltage in the sense node of the amplifier may not be
-completely linear.  [There are other sources of non-linearity; this seems to be
-the best place to do this correction, and I would like RHL help in describing
-these.]
+The response of the readout system is not completely linear, with
+non-linearities at difference signal levels injected at different parts of the
+signal chain, as described in Section~\ref{sec:detmodel}.  For the sake of
+simplicity, we apply the linearity correction at the location of the largest
+source of non-linearity, which is at the output amplifier from the detector.
 
-Our linearity correction model is a multi-node spline as original defined by
-P. Astier (ref?).  The linearity correction per amplifier is derived from a
-series of flat pairs illuminated at different flux levels and contemporaneously
-monitored with a photodiode.  We need to take special care in accounting for
-the different illumination patterns when the LED is used with different current
-levels, as well as stray light, and gain variation as a function of temperature
-(described below).
-
-\subsection{Bias Subtraction}
-
-After correcting for the effects described above, there may be some residual
-imprint of some bias structure.  To generate a bias frame, which will be
-subsequently subtracted from the image we take a series of zero-second
-integration frames, perform the above ISR correction described above on each
-frame independently, and then take the median per pixel.  This is what we call
-a ``combined bias frame''. Note that it is important to perform crosstalk
-correction prior to bias frame creation to ensure that the crosstalk signal
-from hot columns is corrected or else these will get imprinted on all of the
-amplifier segments which is undesirable.
+Our linearity correction model is a multi-node spline as originally defined by
+P. Astier [ref].  The linearity correction per amplifier is derived from a
+series of flat pairs illuminated at different flux levels and contamporaneously
+monitored by a reference photodiode.  After the full linearity correction we
+find residuals below the 0.05\% level, some of which can be attributed to
+uncertainty in the photodiode measurements.
 
 \subsection{CTI Correction}
 \label{sec:cticorr}
 
-Now that we have corrected for all the amplifier effects, we can now correct
-for effects that are in the detector itself.  The first of these is charge
-transfer inefficiency (CTI).  The CTI model of Snyder and Roodman (2020) is
-calibrated with the ``extended pixel edge response'' (EPER) measurement that
-shows how much imaging charge from flat-field images leaks into the serial
-overscan region.
+Now that we have corrected the linearity, the next instrument signature to
+remove is the serial charge transfer inefficiency (sCTI) according to the
+Snyder and Roodman model, which is primarly caused by the wiring coming out of
+the detector.  The sCTI model is calibrated with the ``extended pixel edge
+response'' (EPER) measurement that measures how much imaging charge from
+flat-field images leaks into the serial overscan region. We additionally use
+the first pixel in the serial overscan region to fix the sCTI in the imaging
+region.
 
-\subsection{Variance Plane Creation}
+\subsection{Imaging Region Assembly}
+\label{sec:assembly}
 
-We now estimate the variance plane of the image.  This is computed by starting
-with the gain-corrected image itself, assuming Poisson variance.  We
-additionally add in the read noise per amplifier which was estimated from the
-PTC analysis above.
+At this stage we no longer have any need for the serial and parallel overscan
+regions, and the processed image is trimmed to only include the on-sky imaging
+region for the detector. Various statistics including mean, median, and
+standard deviations are computed for the overscan and residual overscan regions
+and these are stored in the image metadata.
 
-\subsection{Defect Masking and Interpolation}
+\subsection{Bias Subtraction}
+\label{sec:biascorr}
 
-Next we mask all known defects and flag these pixels with the ``BAD`` mask bit.
-The defects are determined following the methodology from the camera team
-(ref?).  We have two types of defects, ``hot'' defects which are determined
-from looking at high outlier pixels in the combined dark frames, and ``cold''
-defects which are determined from looking at low outlier pixels in the combined
-flat field frames.  Additionally, we mask all pixels in a 5 (TBD) pixel border
-around each detector which have very strong lateral electric field distortions
-at this stage.
-
-After masking, these pixels are interpolated for visual fidelity using an
-interpolation algorithm that is about to be updated this week and we will need
-a reference/description of that.
+After correcting for the effects described above, there may be some residual
+imprint of some bias structure.  To generate a bias frame, which will be
+subsequently subtracted from the image we take a series of $\sim400$
+zero-second integration frames, perform the above ISR correction described
+above on each frame independently, and then compute the clipped mean per pixel.
+This is what we call a ``combined bias frame''. Note that it is important to
+perform crosstalk correction prior to bias frame creation to ensure that the
+crosstalk signal from hot columns is corrected or else these will get imprinted
+on all of the amplifier segments which is undesirable.
 
 \subsection{Dark Subtraction}
 \label{sec:darkcorr}
 
-We determine the dark current by taking a series of 30 second images (to match
-the survey integration time) and taking a clipped mean combination after
-rejecting obvious cosmic rays in the dark images.  The typical dark current is
-small (XX electrons per second) but may be larger for some amplifiers.
+We now subtract off the residual dark current, based on the effective dark time
+of the exposure, which may be slightly longer than the open-shutter exposure
+time.  The dark current is computed by taking a series of $\sim400$ 30 second
+exposures with the shutter closed (to match the typical survey exposure
+integration time), and taking a clipped mean combination after rejecting cosmic
+rays in the dark images.  The typical dark current is very small for the vast
+majority of amplifiers (XX electrons per second), necessitating such a large
+set of inputs to get a significant estimate of the dark current.  The dark
+current may be larger for some amplifiers or warm regions, as well as for warm
+pixels.
 
 \subsection{Brighter-Fatter Correction}
-\label{sec:bfecorr}
+\label{sec:bfcorr}
 
-Finally, we correct for the Brighter/Fatter effect.  To derive the BFE kernel
-to correct this effect we make use of the fact that the BFE creates
-pixel-to-pixel correlations in flat-field images.  The BFE kernel itself is
-derived from the same flat-field pairs that are used to derive the PTC gain.
-See Broughton et al. (2003) [ref] for details on our algorithm for estimating
-the BFE kernel as well as correcting it in the pixel images.
+We now correct for the final instrument signature, the Brighter/Fatter effect.
+The BF correction is naturally in units of $\etron$ as it is the outcome of
+charge accumulating in the detector pixels.  To derive the BF kernel for
+correction we make use of the fact that the BF creates pixel-to-pixel
+correlations in flat-field images. Therefore, we can use the flat-field image
+pars that are used to derive the PTC gain and linearity correction as an input
+to the BF kernel generation code.  See Broughton et al. (2023) [ref] for
+details on our algorithm for estimating the BF kernel as well as correcting for
+the BF effect in pixel images.
+
+We note that because the BF kernel is a non-local effect, we cannot apply a
+correction near the detector edges and must interpolate over any known bad or
+saturated pixels prior to applying the correction.  The interpolation in this
+stage may be more aggressive than we want in the final image, and therefore
+interpolated pixels are restored to their original values (plus the correction
+value) after BF processing.  All pixels near a detector
+edge that cannot be corrected by the BF kernel are marked with the
+\texttt{EDGE} mask bit.
+
+\subsection{Defect Masking and Interpolation}
+\label{sec:defectmasking}
+
+At this stage in the processing we do our final interpolation over saturated
+and defect pixels.  These saturated and defect pixels are not used downstream,
+but the interpolation is done to help create better images for visual
+inspection that do not have the dynamic range ruined by unusable pixels.
+
+Defects are all marked with the \texttt{BAD} mask bit.  The defects themselves
+are derived from an initial combined bias, dark, and flat field image.  We look
+for pixels with significant flux ($>1000\,\mathrm{ADU}$) in the bias; hot pixels
+that have a flux of at least $3\,\etron/s$ in the dark; and cold pixels that
+have at least a 5\% deficit in the flat.  In addition, we mask all pixels that
+are within 5 pixels of the detector edge as defects to avoid the very strong
+gradient in pixel size caused by lateral electric fields in these regions.
+Finally, we have scanned the focal plane for unusual defects that are best
+masked manually.
+
+\subsection{Variance Plane Creation}
+\label{sec:varplane}
+
+We now estimate the variance plane of the image.  This is computed by starting
+with the gain-corrected image itself, assuming Poisson variance.  We
+additionally add in quadrature the read noise per amplifier which was estimated from the
+PTC analysis above.  Our variance plane therefore includes variance from the
+sources themselves.  One consequence of having 16 amplifiers per detector with
+different gains and read noise values is that while the image itself should not
+show any amplifier boundaries after processing, the final variance plane will
+show amplifier boundaries due to the different noise characteristics of each
+amplifier segment.
 
 \subsection{Applying Flat Fields}
 
