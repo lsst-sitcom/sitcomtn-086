@@ -796,13 +796,12 @@ is obtained by measuring the response to a Lambertian source of light such as
 the dome screen.  First of all, the dome flat contains a factor of the pixel
 area $\Omega(x, y)$, which means that it assumes pixel size variations are QE
 variations.  Second, there are differences in focused and scattered light
-patterns from a flat field screen and distant sky sources.  Third, the dome
-flat is contaminated by scattered light.  Finally, the SED of the dome flat
-does not match the reference spectrum.  This final problem we will fix in
-future data processing by synthesizing broadband flats from narrow-band flats.
-Nevertheless, we still start with dome flats as they are the most efficient way
-of measuring the relative response of all the billions of pixels in LSSTCam on
-small scales.
+patterns from a flat field screen and distant sky sources.  Finally, the SED of
+the dome flat does not match the reference spectrum.  This final problem we
+will fix in future data processing by synthesizing broadband flats from
+narrow-band flats.  Nevertheless, we still start with dome flats as they are
+the most efficient way of measuring the relative response of all the billions
+of pixels in LSSTCam on small scales.
 
 The dome flat is a good start for estimating the reference flux flat, but has
 issues at small scales and large scales.  At small scales, there are lateral
@@ -814,23 +813,93 @@ dome flat which includes unfocused and scattered light.
 To handle lateral electric field effects we fit templates based on our physical
 knowledge of the detectors.  This includes radial templates for tree rings with
 a fixed center, and square templates around the edge of the detectors.  The
-exact methodology is TBD.
+exact methodology is TBD, and may not be in place by the end of commissioning.
 
-To handle large scale variations for LSST Y1 we use a ``star flat'' generated
-from a sequence of multi-band dithered observations of a moderately dense star
-field.  These observations are cross-calibrated using FGCM to generate
-per-detector polynomial approximations of the throughput relative to the dome
-flat at scales of hundreds of pixels and greater.  By making use of stars of
-various colors, the FGCM solution can approximate the star flat terms for a
-flat reference spectrum.
+To handle the larger scale illumination correction for LSST Y1 we use a ``star
+flat'' generated from a sequence of multi-band dithered observations of a
+moderately dense star field.  These observations are cross-calibrated using
+FGCM to generate per-detector polynomial approximations of the throughput
+relative to the dome flat at scales of tens of pixels and greater.  By
+making use of stars of various colors, the FGCM solution can approximate the
+star flat terms for a flat reference spectrum.
 
-In the future, we plan to use what we call the ``dynamic'' CBP, where the
-synthetic stars from the CBP are dithered around the full focal plane.  The
-advantage of this is that the response can be more carefully controlled, and it
-can be performed in narrow wavelength steps to build up the dynamic CBP star
-flat with any arbitrary spectrum.  The software to perform this analysis will
-not be ready by the completion of construction and will be developed in the
-early years of the LSST.
+The illumination correction is then generated per-band from the star flat and the
+pixel area variations determined from the Jacobian of the world coordinate
+system (WCS) from the camera model.  This becomes:
+%
+\begin{equation}
+  S^{\mathrm{illum}}(x, y) = \frac{1.0}{S^{\mathrm{star}}(x, y)\,\Omega(x, y)},
+\end{equation}
+%
+where $S^{\mathrm{illum}}(x, y)$ is the illumination correction,
+$S^{\mathrm{star}}(x, y)$ is the star flat, and $\Omega(x, y)$ is the pixel
+area field. The reference flux flat then becomes:
+%
+\begin{equation}
+  S^{\mathrm{refflux}}(x, y) = S^{\mathrm{dome}}(x, y)\,S^{\mathrm{illum}}(x,
+  y),
+\end{equation}
+%
+where $S^{\mathrm{dome}}(x, y)$ is the dome flat.
+
+While the reference flux flat is the flat to use to obtain a
+photometrically-flattened image, the dome flat is
+more appropriate to use to obtain a background-flattened image because the sky
+follows similar light paths, including scattering, as the Lambertian flat-field
+screen illuminator.   Thus, we approximate the background flat
+$S^{\mathrm{bkg}}(x,y)$ with the dome flat.  This is a very good approximation
+in the limit of the sky SED matching the SED of the LEDs used to illuminate the
+flat-field screen.  In the future we plan to synthesize the background flat
+from narrow-band flats to more appropriately match the sky SED per visit.  This
+functionality is not planned for LSST Y1.
+
+We find it convenient for visualization to apply the dome flat at the end of
+the ISR stage, such that we get:
+%
+\begin{equation}
+  {\etron}_b^{\mathrm{bkg}}(x, y) = \frac{\etron_b(x, y)}{S^{\mathrm{dome}}(x, y)},
+\end{equation}
+%
+where $\etron_b(x, y)$ is the unflattened count of electrons per pixel (in band
+$b$) , and ${\etron}_b^{\mathrm{bkg}}(x, y)$ is the background-flattened image.
+
+Similarly, the photometrically-flattened image ${\etron}_b^{\mathrm{phot}}(x, y)$
+is:
+%
+\begin{equation}
+  {\etron}_b^{\mathrm{phot}}(x, y) = \frac{\etron_b(x,
+    y)}{S^{\mathrm{refflux}}(x, y)}.
+\end{equation}
+%
+Putting this together we have:
+%
+\begin{equation}
+  {\etron}_b^{\mathrm{phot}}(x, y) = \frac{\etron_b(x, y)}{S^{\mathrm{dome}}(x,
+    y)\, S^{\mathrm{illum}}(x, y)}.
+\end{equation}
+%
+
+In practice, we make use of the background-to-photometric ratio, which is equal
+to the illumination correction:
+%
+\begin{equation}
+  \frac{{\etron}_b^{\mathrm{bkg}}(x, y)}{{\etron}_b^{\mathrm{phot}}(x, y)} =
+  S^{\mathrm{illum}}(x, y).
+\end{equation}
+%
+This means that we need to apply (or unapply) the illumination correction in
+our pipelines whenever we want to do flux measurements vs background
+subtraction.
+In the end our images with the illumination correction (reference flux flat)
+applied are in ``fluence'' (electron counts per pixel) units and not ``surface
+brightness'' units, as this procedure divides by the pixel area $\Omega(x, y)$.
+
+For LSST Y1 we use a constant illumination correction for a given band for all
+images within a given range of time (as long as possible).  In the future we
+plan to synthesize a new background-to-photometric ratio for every image given
+the background SED (based on solar elevation and lunar illumination). The
+software to perform this analysis will not be ready by the completion of
+construction and will be developed in the early years of the LSST.
 
 \subsection{Atmosphere Response}
 
