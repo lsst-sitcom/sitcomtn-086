@@ -103,7 +103,7 @@ In particular, we refer the reader to \citet[henceforth B17]{2017PASP..129k4502B
 \section{Requirements}
 
 The requirements on calibration are defined in the LSST Science Requirements
-Document (LPM-17). The photometric quality and accuracy of the LSST data
+Document \citedsp{LPM-17}. The photometric quality and accuracy of the LSST data
 products is driven by four main components:
 \begin{enumerate}
     \item Relative photometry (repeatability)
@@ -134,9 +134,9 @@ that the average of $\deltam$ over the cataloged area is 0 by construction.
 The SRD allocates error specifications for g,r,i bands, with a 50\% increase
 expected for u,z,y bands. These high level allocations are further broken
 down to three main elements in Observatory System Specifications
-(LSE-30). These are Instrument Throughput, Atmospheric Transmittance, and
+\citedsp{LSE-30}. These are Instrument Throughput, Atmospheric Transmittance, and
 Reference Star Catalogs. The full functional error budget can be found in LSST
-Document-9553.
+\citeds{Document-9553}.
 
 \begin{table}
 \centering
@@ -170,9 +170,9 @@ is 0 by construction.
 
 The SRD allocates error specifications for the griz bands, with a 50\% increase
 expected for $u$ and $y$ bands.  These high level allocations are further broken
-down to three main elements in Observatory System Specifications (LSE-30).
+down to three main elements in Observatory System Specifications \citedsp{LSE-30}.
 These are Instrument Throughput, Atmospheric Transmittance, and Reference Star
-Catalogs.  The full functional error budget can be found in LSST Document-9553.
+Catalogs.  The full functional error budget can be found in LSST \citeds{Document-9553}.
 
 \begin{table}
     \begin{tabular}{|c|c|c|c|c|}
@@ -193,7 +193,7 @@ Catalogs.  The full functional error budget can be found in LSST Document-9553.
 \end{table}
 
 From these functional requirements, requirements are allocated to the Telescope
-\& Site (LSE-60) and Data Management (LSE-61) systems to ensure that the
+\& Site \citedsp{LSE-60} and Data Management \citedsp{LSE-61} systems to ensure that the
 functional requirements are met.
 
 \section{Instrumental Signature Reduction (ISR)}
@@ -790,7 +790,7 @@ fluence or surface density images, following B17.
 
 \section{CBP}
 
-Flatfield system consists of four main parts: a calibration screen, an aspheric reflector optic, a tunable laser and a white light system. 
+Flatfield system consists of four main parts: a calibration screen, an aspheric reflector optic, a tunable laser and a white light system.
 
 The calibration screen will be illuminated by either the white light system or
 a tunable laser. The white light system will be used for daily flats, while the
@@ -804,7 +804,7 @@ aligned with the reflector to ensure a flat illumination pattern on the
 calibration screen.
 
 \subsection{Calibration Screen}
-The calibration screen is a large reflective surface that can be aligned with the primary mirror and send diffuse light directly to the telescope and camera. It is large enough to illuminate the whole telescope at one time. The surface itself has a diameter of 10.27 meters and an inner diameter of 3.18 meters. Of this area, the section from a diameter of 4.18 - 9.27 meters is coated with a highly reflective material. The outer and inner rings are coated with a very absorptive material. The screen is built of several small panels, with 16 panels making the outer ring and 8 panels making the inner ring. They are secured to a structure such that they are all flat to 3mm across the whole surface. The panels are coated with Labsphere Permaflect 94\% and 5\% respectively. 
+The calibration screen is a large reflective surface that can be aligned with the primary mirror and send diffuse light directly to the telescope and camera. It is large enough to illuminate the whole telescope at one time. The surface itself has a diameter of 10.27 meters and an inner diameter of 3.18 meters. Of this area, the section from a diameter of 4.18 - 9.27 meters is coated with a highly reflective material. The outer and inner rings are coated with a very absorptive material. The screen is built of several small panels, with 16 panels making the outer ring and 8 panels making the inner ring. They are secured to a structure such that they are all flat to 3mm across the whole surface. The panels are coated with Labsphere Permaflect 94\% and 5\% respectively.
 
 The structure on which the panels are mounted can rotate from 0 to -23 degrees
 relative to horizontal using an actuator. In this way, it can be tilted so that
@@ -814,7 +814,7 @@ be seen by a laser tracker that is mounted on the telescope so that the screen
 can be easily aligned with the telescope on a daily basis.
 
 
-Requirements for the screen can be found in LTS-523 and drawings can be found in LTS-126.
+Requirements for the screen can be found in \citeds{LTS-523} and drawings can be found in \citeds{LTS-126}.
 
 \subsection{Reflector}
 
@@ -836,21 +836,21 @@ The shape and reflectivity of the optic were measured in the laboratory. The sha
 
 As mentioned above, the reflector is mounted on the back side of the camera and the pancake wrap. It is mounted on its own hexapod, which can be adjusted manually. When installed, it will be carefully aligned with the optical axis of the telescope, using this hexapod, and then secured in place.
 
-The reflector has a cover which can be opened by command using linear actuators. 
+The reflector has a cover which can be opened by command using linear actuators.
 
 \subsection{Tunable Laser}
-The tunable laser is an Ekspla NT242 and capable of producing light from 300 - 2600 nm in 1 nm steps (see fig. \ref{fig:laser_power}). It does this by using a combination of a tunable parametric stage using OPO crystals and a sum frequency generation stage. 
-Addiitonally, this laser has a spectral cleaning unit, which slightly reduces the output power but increases the spectral purity by removing some of the primary and secondary harmonics using a prism. The laser interfaces to a Fiber Coupling unit, which makes is easy to switch between outputs, two of which focus the light into fibers. 
-In this way, we can easily switch between sending the light to the flat field or the Collimated Beam Projector. 
+The tunable laser is an Ekspla NT242 and capable of producing light from 300 - 2600 nm in 1 nm steps (see fig. \ref{fig:laser_power}). It does this by using a combination of a tunable parametric stage using OPO crystals and a sum frequency generation stage.
+Addiitonally, this laser has a spectral cleaning unit, which slightly reduces the output power but increases the spectral purity by removing some of the primary and secondary harmonics using a prism. The laser interfaces to a Fiber Coupling unit, which makes is easy to switch between outputs, two of which focus the light into fibers.
+In this way, we can easily switch between sending the light to the flat field or the Collimated Beam Projector.
 
-The laser is designed to operate in room temperature air (18-25$^{\circ}$C). 
-It will be housed in an aluminum structure mounted to the dome near the calibration screen and sitting below the CBP. 
+The laser is designed to operate in room temperature air (18-25$^{\circ}$C).
+It will be housed in an aluminum structure mounted to the dome near the calibration screen and sitting below the CBP.
 The laser will be kept within this operating temperature range as much as possible using heaters used in a small area ($<$100W). After use of the laser, heat will be removed from the enclosure using fans until the enclosure is within 2 degrees of the ambient dome environment.
-The laser light will be fed into a NA 0.22 optical fiber (Ceramoptic WFNS) and travel $\sim$ 15 m from the laser platform to the CBP and central projector. 
+The laser light will be fed into a NA 0.22 optical fiber (Ceramoptic WFNS) and travel $\sim$ 15 m from the laser platform to the CBP and central projector.
 
-The laser can be operated in continuous mode or burst mode. 
-The pulse duration is 3-6 ns, with a repetition rate of 1000 Hz. 
-In continuous mode it will continue to send pulses at this rate. 
+The laser can be operated in continuous mode or burst mode.
+The pulse duration is 3-6 ns, with a repetition rate of 1000 Hz.
+In continuous mode it will continue to send pulses at this rate.
 In burst mode, you can select a number of pulses sent in a ``burst", after which it will not emit until you tell the laser to send another burst.
 
 \begin{figure}[h]
@@ -871,14 +871,14 @@ Model output
 
 \subsection{Monitoring systems}
 
-We will want to measure precisely how much light from the laser is entering the CBP at a given wavelength so that we determine the exact fraction of that light that is captured by the LSST camera. In order to do that, we need to monitor the luminosity of the laser as it enters the integrating sphere as well as the spectral properties of the light. This data will be recorded for every measurement made with the CBP in such a way that it can be easily linked to the LSST camera image. 
+We will want to measure precisely how much light from the laser is entering the CBP at a given wavelength so that we determine the exact fraction of that light that is captured by the LSST camera. In order to do that, we need to monitor the luminosity of the laser as it enters the integrating sphere as well as the spectral properties of the light. This data will be recorded for every measurement made with the CBP in such a way that it can be easily linked to the LSST camera image.
 
 \paragraph{\textbf{Photodiode}}
 
-In order to monitor the exact amount of light injected into the CBP, we use a Hamamatsu S2281 Silicon Photodiode that has been precisely calibrated by NIST. 
-This photodiode, which is mounted directly to the integrating sphere, has a sensitive area of 11 mm in diameter. It is read out by a Keithley 6517b electrometer. The electrometer can measure current, charge, resistance and voltage. Our uses of the CBP will likely use the charge and current modes. 
+In order to monitor the exact amount of light injected into the CBP, we use a Hamamatsu S2281 Silicon Photodiode that has been precisely calibrated by NIST.
+This photodiode, which is mounted directly to the integrating sphere, has a sensitive area of 11 mm in diameter. It is read out by a Keithley 6517b electrometer. The electrometer can measure current, charge, resistance and voltage. Our uses of the CBP will likely use the charge and current modes.
 
-The electrometer can be read out as quickly as every 20 ms. There is a relationship between how long of an exposure you can take and the integration time. At the minimum integration time, you can take an exposure of $\sim$30 seconds. The data is saved in a fits file in the lfa with the elapsed time from the start of the exposure and the value measured. The range can be set to any value from X to Y. 
+The electrometer can be read out as quickly as every 20 ms. There is a relationship between how long of an exposure you can take and the integration time. At the minimum integration time, you can take an exposure of $\sim$30 seconds. The data is saved in a fits file in the lfa with the elapsed time from the start of the exposure and the value measured. The range can be set to any value from X to Y.
 
 \paragraph{\textbf{Fiber Spectrograph}}
 
@@ -888,10 +888,10 @@ The data from the spectrographs will be saved in a fits file in the lfa that wil
 
 \section{CBP}
 The Rubin CBP was built by DFM Engineering~\footnote{https://www.dfmengineering.com}.
-The design is essentially a Schmidt camera used in reverse. 
-It includes a primary mirror of 33cm diameter, Schmidt Corrector and a 3-element Flat Field Corrector. 
-It produces a beam with an aperture of 24.1 cm and a field of view of 4.1 degrees. 
-The focal length of the CBP is 625mm, and with the LSST focal length at 10.1m, the magnification factor is 16. Therefore, a 100$\mu$m pinhole on the CBP would correspond to 1600 $\mu$m, or 160 pixels. 
+The design is essentially a Schmidt camera used in reverse.
+It includes a primary mirror of 33cm diameter, Schmidt Corrector and a 3-element Flat Field Corrector.
+It produces a beam with an aperture of 24.1 cm and a field of view of 4.1 degrees.
+The focal length of the CBP is 625mm, and with the LSST focal length at 10.1m, the magnification factor is 16. Therefore, a 100$\mu$m pinhole on the CBP would correspond to 1600 $\mu$m, or 160 pixels.
 
 \begin{table}[h!]
     \centering
@@ -910,9 +910,9 @@ The focal length of the CBP is 625mm, and with the LSST focal length at 10.1m, t
 
 The mount of the CBP allows movement in Azimuth and Elevation, with a swing
 diameter of 1.32 meters.
-The locations are controlled by a Galil Digital Motor Controller (DMC) that is mounted on the azimuth housing. It controls the motors, reads the encoders, and interfaces to the control computer over ethernet. 
-Additionally, the DMC controls the focus of the primary mirror and changes and rotates the masks. 
-The azimuth and elevation stages are absolutely encoded with a Renishaw 26-bit on axis encoder. 
+The locations are controlled by a Galil Digital Motor Controller (DMC) that is mounted on the azimuth housing. It controls the motors, reads the encoders, and interfaces to the control computer over ethernet.
+Additionally, the DMC controls the focus of the primary mirror and changes and rotates the masks.
+The azimuth and elevation stages are absolutely encoded with a Renishaw 26-bit on axis encoder.
 
 
 \begin{figure}[h]
@@ -922,13 +922,13 @@ The azimuth and elevation stages are absolutely encoded with a Renishaw 26-bit o
     \label{fig:cbp_major_subsystems}
 \end{figure}
 
-At the focal plane sits the mask stage, which can hold 5 different masks. The masks can be rotated, driven by worm gears such that all masks are rotated on a common shaft by a single motor. The center mask stage is position encoded using a Renishaw absolute rotary encoder. The mask holder can hold masks with a diameter of 50 mm. Each mask will be laser etched into aluminium and are removable/interchangeable. 
+At the focal plane sits the mask stage, which can hold 5 different masks. The masks can be rotated, driven by worm gears such that all masks are rotated on a common shaft by a single motor. The center mask stage is position encoded using a Renishaw absolute rotary encoder. The mask holder can hold masks with a diameter of 50 mm. Each mask will be laser etched into aluminium and are removable/interchangeable.
 
-The current Integrating Sphere installed on the CBP is a Labsphere 3P-GPS-060-SF. 
-This integrating sphere has an interior diameter of 6 in. (152.4mm) and an exit port of 2.5 in. (63.5 mm), coated with spectraflect coating. 
+The current Integrating Sphere installed on the CBP is a Labsphere 3P-GPS-060-SF.
+This integrating sphere has an interior diameter of 6 in. (152.4mm) and an exit port of 2.5 in. (63.5 mm), coated with spectraflect coating.
 In the exit port a photodiode will be mounted and it will be illuminated by an optical fiber.
-The integrating sphere is held to the mask stage with standoffs. 
-It sits $\sim 7.5~\mathrm{cm}$ from the focal plane/mask. 
+The integrating sphere is held to the mask stage with standoffs.
+It sits $\sim 7.5~\mathrm{cm}$ from the focal plane/mask.
 Using \url{https://www.labsphere.com/wp-content/uploads/2021/09/Integrating-Sphere-Theory-and-Applications.pdf} as a guide to calculate the intensity of light exiting the integrating sphere by multiplying Ls by the flux incident on the integrating sphere.
 
 
@@ -953,7 +953,7 @@ Evolution of the calibration system beyond LSST year 1.
     \hline
     \textbf{Dark} &  (combined) \\
     \hline
-    \textbf{CTI} & what are these? \\  
+    \textbf{CTI} & what are these? \\
     \hline
     \textbf{PTC} & Linearity + Gain \\
     \hline
@@ -967,15 +967,15 @@ Evolution of the calibration system beyond LSST year 1.
     \hline
      & Lateral e-field templates \\
     \hline
-    \textbf{QE$_{det}$} & Sensor QE \\ 
+    \textbf{QE$_{det}$} & Sensor QE \\
     \hline
     \textbf{R$_{mirror}$} & Mirror reflectivity (Silver x3) \\
     \hline
     \textbf{T$_{filter}$} & Filter transmission \\
     \hline
-     & “White” light flats (ugrizy) \\ 
+     & “White” light flats (ugrizy) \\
     \hline
-    \textbf{T}(det, $\lambda$) & Transmission \\ 
+    \textbf{T}(det, $\lambda$) & Transmission \\
     \hline
      & Dust flat (?) \\
     \hline
