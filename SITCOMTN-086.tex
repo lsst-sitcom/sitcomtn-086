@@ -449,7 +449,7 @@ The fundamental goal of photometric calibration is to estimate the surface brigh
 Our general outline for uniform photometry follows DES and specifically B17 and BR18.
 Our ground-based telescope will count only a fraction of photons from a celestial source that reaches the top of the Earth's atmosphere after attenuation from the atmosphere, filters, optics, and detector quantum efficiency.
 
-Our overall photometry plan follows BR18, in particular the use of the Forward Global Calibration Method (FGCM).
+Our overall photometry plan follows BR18, in particular the use of the Forward Global Calibration Method \citep[FGCM;][]{2018AJ....155...41B}.
 This global calibration algorithm uses repeated observations of stars in multiple bands, through multiple instrumental and atmospheric bandpasses, to simultaneously constrain the atmospheric model as well as standardized TOA star fluxes over a wide range of star colors.
 
 \subsection{Chromatic Corrections}
@@ -486,7 +486,7 @@ time-dependent, as such:
 \Sobs \equiv S_b(x, y, \mathrm{alt}, \mathrm{az}, t, \lambda).
 \end{equation}
 
-Following Fukugita et al. (1996), we define the AB magnitude of a source to be:
+Following \citet{1996AJ....111.1748F} we define the AB magnitude of a source to be:
 %
 \begin{equation}
 \mobs = -2.5\,\mathrm{log}_{10} \left ( \frac{\int_0^{\infty}
@@ -734,7 +734,7 @@ S^{\mathrm{molecular}}(\mathrm{bp}, \mathrm{zd}, t,
 %
 where $S^{\mathrm{molecular}}$ is the absorption and scattering from dry gasses (primarily in the u, g, and r bands); $S^{\mathrm{PWV}}$ is the absorption by water vapor (primarily in the z and y bands); $\tau$ is the aerosol optical depth (AOD); $X$ is the airmass; and $\mathrm{bp}$ is the barometric pressure.
 
-Following FGCM, we obtain the molecular scattering using MODTRAN (Berk et al. refs) combined with the barometric pressure, which is obtained as part of the standard suite of weather data at Cerro Pachon.
+Following FGCM, we obtain the molecular scattering using MODTRAN \citep{1999SPIE.3756..348B} combined with the barometric pressure, which is obtained as part of the standard suite of weather data at Cerro Pachon.
 Ozone absorption can be parameterized by one parameter per night.
 All constituent throughputs are computed as a function of zenith distance (airmass) in finite steps and interpolated at each wavelength step.
 
